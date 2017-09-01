@@ -191,12 +191,12 @@ public class Controller implements Runnable {
 
     private void createRoomsBuildingOne() {
 
-        building.addRoom(building.getCell(0, 0), building.getCell(4, 3));
-        building.addRoom(building.getCell(0, 4), building.getCell(4, 7));
-        building.addRoom(building.getCell(5, 0), building.getCell(9, 7));
-        building.addRoom(building.getCell(10, 0), building.getCell(14, 3));
-        building.addRoom(building.getCell(10, 4), building.getCell(14, 7));
-        building.addRoom(building.getCell(15, 0), building.getCell(19, 7));
+        building.addRoom(building.getCell(0, 0, 0), building.getCell(4, 3, 0));
+        building.addRoom(building.getCell(0, 4, 0), building.getCell(4, 7, 0));
+        building.addRoom(building.getCell(5, 0, 0), building.getCell(9, 7, 0));
+        building.addRoom(building.getCell(10, 0, 0), building.getCell(14, 3, 0));
+        building.addRoom(building.getCell(10, 4, 0), building.getCell(14, 7, 0));
+        building.addRoom(building.getCell(15, 0, 0), building.getCell(19, 7, 0));
 
     }
 
@@ -310,7 +310,6 @@ public class Controller implements Runnable {
                 new JPanel());
 
         controller.start();
-
 
     }
 

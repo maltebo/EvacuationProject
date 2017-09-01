@@ -184,7 +184,7 @@ public class Building {
      * @param gridSizeX       grid size in x-direction.
      * @param gridSizeY       grid size in y-direction.
      * @param averageCapacity average Capacity of people in this building.
-     * @param numberOfFloors the number of Floors of this building.
+     * @param numberOfFloors  the number of Floors of this building.
      */
     public Building(String name, int gridSizeX, int gridSizeY, int numberOfFloors, int averageCapacity) {
         this.name = name;
@@ -249,26 +249,39 @@ public class Building {
      *
      * @param x the x value of the cell
      * @param y the y value of the cell
+     * @param f floor of the cell
      * @return the fully specified cell (with all its parameters)
      */
-    public Cell getCell(int x, int y) {
-        return grid.getCell(x, y);
+    public Cell getCell(int x, int y, int f) {
+        return grid.getCell(x, y, f);
     }
+
+
+    public Cell getCell(int x, int y) {
+        return grid.getCell(x, y, 0);
+    }
+
 
     /**
      * facilityClass, does the same as
-     * <code>#getCellPair(#getCell(x1,y1),#getCell(x2,y2))</code>
+     * <code>#getCellPair(#getCell(x1,y1,floor1),#getCell(x2,y2,floor2))</code>
      *
-     * @param x1 x Value of first Cell
-     * @param y1 y Value of first Cell
-     * @param x2 x Value of second Cell
-     * @param y2 y Value of second Cell
+     * @param x1     x Value of first Cell
+     * @param y1     y Value of first Cell
+     * @param floor1 floor of first cell
+     * @param x2     x Value of second Cell
+     * @param y2     y Value of second Cell
+     * @param floor2 floor of second cell
      * @return the full <code>CellPair</code>
      */
+    public CellPair getCellPair(int x1, int y1, int floor1, int x2, int y2, int floor2) {
+
+        return getCellPair(getCell(x1, y1, floor1), getCell(x2, y2, floor2));
+
+    }
+
     public CellPair getCellPair(int x1, int y1, int x2, int y2) {
-
-        return getCellPair(getCell(x1, y1), getCell(x2, y2));
-
+        return getCellPair(x1,y1,0,x2,y2,0);
     }
 
     /**
@@ -1197,6 +1210,8 @@ public class Building {
          * cell in the right lower corner
          */
         private Cell end;
+
+        private transient int floor;
         /**
          * the Room's unique id
          */
@@ -1231,6 +1246,8 @@ public class Building {
             this.passages = new HashSet<>();
             this.exits = new HashSet<>();
             this.id = id;
+            this.floor = beginning.getFloor();
+            if (floor != end.getFloor()) throw new IllegalStateException("Room needs to be in one floor");
             cells = calculateCells();
 
             for (Cell cell : cells) {
@@ -1248,6 +1265,7 @@ public class Building {
         Room(Cell beginning, Cell end) {
             this(beginning, end, roomNumber++);
         }
+
 
         /**
          * calculates all Cells that belong to this Room
@@ -1319,6 +1337,10 @@ public class Building {
          */
         public Cell getEnd() {
             return end;
+        }
+
+        public int getFloor() {
+            return floor;
         }
 
         /**
@@ -1458,7 +1480,8 @@ public class Building {
          * @param building the building this Stair will be added to
          */
         private Cell deserializeCell(JsonObject tempCell, Building building) {
-            return building.getCell(tempCell.get("x").getAsInt(), tempCell.get("y").getAsInt());
+            return building.getCell(tempCell.get("x").getAsInt(), tempCell.get("y").getAsInt(),
+                    tempCell.get("floor").getAsInt());
         }
     }
 
