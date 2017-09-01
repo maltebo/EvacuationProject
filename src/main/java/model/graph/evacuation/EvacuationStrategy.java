@@ -5,7 +5,6 @@ import model.graph.building.Building;
 import model.graph.useragent.Person;
 
 import java.util.HashSet;
-import java.util.LinkedList;
 
 public abstract class EvacuationStrategy {
 
@@ -13,15 +12,12 @@ public abstract class EvacuationStrategy {
 
     HashSet<Person> persons;
 
+
     public EvacuationStrategy(Building building) {
         this.building = building;
         this.persons = building.getPersonsInBuilding();
     }
 
-
-    public String getName() {
-        return getClass().getName();
-    }
 
     public abstract Path getPath(Person person);
 

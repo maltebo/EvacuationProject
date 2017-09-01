@@ -219,8 +219,11 @@ class MovementModule {
 
             }
         }
-        // TODO: More advanced algorithms
         else if (person.getState() == Person.STATE.EVACUATION) {
+
+            if (evacuationStrategy == null) {
+                evacuationStrategy = building.getEvacuationStrategy();
+            }
 
             if (person.getIsOnCell().isOutside()) {
                 return DIR.STAY;
@@ -263,8 +266,8 @@ class MovementModule {
                 for (int direction : dir2) {
                     // we calculate cell that would be reached
                     Cell newCell = cell.getNextCell(direction);
-                    // see above
-                    if (isValid(cell, newCell, person.isDisabled())) {
+                    // see above, we do not want to leave the room to one that is not specified in the Path
+                    if (isValid(cell, newCell, person.isDisabled()) && cell.getRoom().equals(newCell.getRoom())) {
                         return direction;
                     }
                 }
@@ -278,7 +281,7 @@ class MovementModule {
                     // we calculate cell that would be reached
                     Cell newCell = cell.getNextCell(direction);
                     // see above
-                    if (isValid(cell, newCell, person.isDisabled()) && !newCell.isOutside()) {
+                    if (isValid(cell, newCell, person.isDisabled()) && cell.getRoom().equals(newCell.getRoom())) {
                         return direction;
                     }
                 }

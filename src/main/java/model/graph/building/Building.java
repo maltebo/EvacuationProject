@@ -48,6 +48,8 @@ public class Building {
 
     private transient int passageNumber = 0;
 
+    private transient EvacuationStrategy evacuationStrategy;
+
     /**
      * the states in which the building can be in, namely normal and evacuation mode.
      */
@@ -450,14 +452,22 @@ public class Building {
     /**
      * sets the State of the building to evacuation-mode and tells every person to
      * move outside the building.
+     *
+     * @param es the used EvacuationStrategy, gets called in the Menu depending on user input
      */
     public void startEvacuation(EvacuationStrategy es) {
+
+        this.evacuationStrategy = es;
+
         this.state = STATE.EVACUATION;
 
-        es.startEvacuation();
+        evacuationStrategy.startEvacuation();
 
     }
 
+    public EvacuationStrategy getEvacuationStrategy() {
+        return evacuationStrategy;
+    }
 
     /**
      * @return the actual state of the building

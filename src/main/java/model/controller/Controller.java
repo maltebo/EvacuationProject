@@ -160,6 +160,7 @@ public class Controller implements Runnable {
 
         emergency = false;
         building = Building.fromJSON(file);
+        building.updateNumberOfPeople(numberOfPeople);
         buildingRepresentation = new BuildingRepresentation(building);
         window.changeBuilding(buildingRepresentation);
         state = STATE.PAUSE;
