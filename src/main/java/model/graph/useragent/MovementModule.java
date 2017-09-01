@@ -381,8 +381,8 @@ class MovementModule {
                 dir.add(DIR.LEFT);
                 dir.add(DIR.RIGHT);
                 dir.add(DIR.getComplement(yChange));
-                dir.add(DIR.getComplement(yChange) * DIR.LEFT);
                 dir.add(DIR.getComplement(yChange) * DIR.RIGHT);
+                dir.add(DIR.getComplement(yChange) * DIR.LEFT);
             } else {
                 if (dY < 0) {
                     dir.add(xChange * DIR.UP);
@@ -394,8 +394,8 @@ class MovementModule {
                 dir.add(DIR.UP);
                 dir.add(DIR.DOWN);
                 dir.add(DIR.getComplement(xChange));
-                dir.add(DIR.getComplement(xChange) * DIR.UP);
                 dir.add(DIR.getComplement(xChange) * DIR.DOWN);
+                dir.add(DIR.getComplement(xChange) * DIR.UP);
             }
         } else throw new IllegalStateException("You already seem to be there!");
 

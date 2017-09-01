@@ -19,7 +19,7 @@ import java.util.LinkedList;
  * Represents a complete building with rooms, passages and people.
  * Can be in two states: either in normal running state or in evacuation-mode,
  * where all people are evacuated according to the current strategy in <code>MovementModule</code>,
- * <code>PathOntology</code> and <code>EmergencyOntology</code> (TODO)
+ * <code>PathOntology</code> and <code>EmergencyStrategy</code>
  *
  * @author Malte Bossert
  * @version 3.2
@@ -30,7 +30,7 @@ public class Building {
     /**
      * the grid of all cells the building consists of.
      */
-    transient Grid grid;
+    private transient Grid grid;
     /**
      * the name of the building, which can not be changed.
      */
@@ -44,10 +44,20 @@ public class Building {
      */
     public final int gridSizeY;
 
+    /**
+     * the number of rooms in this building, is used for id creation
+     */
     private transient int roomNumber = 0;
 
+    /**
+     * the number of passages in this building, is used for id creation
+     */
     private transient int passageNumber = 0;
 
+    /**
+     * the evacuation strategy in case of evacuation. gets assigned when
+     * an emergency is necessary.
+     */
     private transient EvacuationStrategy evacuationStrategy;
 
     /**
@@ -61,7 +71,7 @@ public class Building {
     /**
      * the average number of people in the building.
      */
-    public int averageCapacity;
+    private int averageCapacity;
 
     /**
      * a <code>HashSet</code> of all persons that are currently in the building.
@@ -87,10 +97,15 @@ public class Building {
      *
      * @see Passage
      * @see Door
-     * @see Stair
      */
     private HashSet<Door> doors;
-    //TODO
+
+    /**
+     * a <code>HashSet</code> of all Stairs in the building
+     *
+     * @see Passage
+     * @see Stair
+     */
     private HashSet<Stair> stairs;
     /**
      * a <code>HashSet</code> of all Exits in the building.
@@ -103,9 +118,9 @@ public class Building {
      * a <code>HashSet</code> of all cells that are outside of the building
      * and belong to an entrance.
      *
-     * @see Grid.Cell
+     * @see Cell
      */
-    private transient HashSet<Grid.Cell> entryCells;
+    private transient HashSet<Cell> entryCells;
 
     /**
      * the <code>Singleton</code> instance of this building.
@@ -116,9 +131,17 @@ public class Building {
     }
 
 
-    public Building (Building building) {
+    /**
+     * copy Constructor, constructs the new Building by taking its basic components
+     * and copying them without copying the actual state of the building.
+     * Number and location of people, kind of emergency-management etc. will not be
+     * copied.
+     *
+     * @param building the <code>Buidling</code> that will be copied
+     */
+    public Building(Building building) {
 
-        this (building.name, building.gridSizeX, building.gridSizeY);
+        this(building.name, building.gridSizeX, building.gridSizeY);
         for (Room room : building.rooms) {
             addRoom(grid.getCell(room.beginning), grid.getCell(room.end), room.id);
         }
@@ -150,7 +173,7 @@ public class Building {
 
 
     /**
-     * the private constructor that creates a new building.
+     * the full constructor that creates a new building.
      *
      * @param name            Name of the building.
      * @param gridSizeX       grid size in x-direction.
@@ -173,7 +196,8 @@ public class Building {
     }
 
     /**
-     * the constructor that creates a new building.
+     * constructor that creates a new building and sets the number of people
+     * inside to zero.
      *
      * @param name      Name of the building.
      * @param gridSizeX grid size in x-direction.
@@ -187,60 +211,125 @@ public class Building {
      * creates the grid with all cells that could be part of the building (according to
      * specified grid-Size).
      *
-     * @see Grid.Cell
+     * @see Cell
      */
     private void createGrid() {
         grid = new Grid(this);
     }
 
-    public void updateNumbers() {
+    /**
+     * this Method updates the number of rooms. Will be called after a building
+     * got created from a JSON-file, because the ids are already assigned.
+     * Usually, the parameters will be set automatically by the constructor of a new
+     * <code>Passage</code> and a new <code>Room</code>
+     */
+    private void updateNumbers() {
         passageNumber = getPassages().size();
         roomNumber = rooms.size();
     }
 
+    /**
+     * @return the grid of the building
+     */
     public Grid getGrid() {
         return grid;
     }
 
-    //TODO
-    public Grid.Cell getCell(int x, int y) {
+    /**
+     * returns a Cell in this building. Does the same as
+     * <code>[building].getGrid().getCell(x,y)</code>
+     *
+     * @param x the x value of the cell
+     * @param y the y value of the cell
+     * @return the fully specified cell (with all its parameters)
+     */
+    public Cell getCell(int x, int y) {
         return grid.getCell(x, y);
     }
 
-    //TODO
-    public Grid.CellPair getCellPair(int x1, int y1, int x2, int y2) {
+    /**
+     * facilityClass, does the same as
+     * <code>#getCellPair(#getCell(x1,y1),#getCell(x2,y2))</code>
+     *
+     * @param x1 x Value of first Cell
+     * @param y1 y Value of first Cell
+     * @param x2 x Value of second Cell
+     * @param y2 y Value of second Cell
+     * @return the full <code>CellPair</code>
+     */
+    public CellPair getCellPair(int x1, int y1, int x2, int y2) {
 
         return getCellPair(getCell(x1, y1), getCell(x2, y2));
 
     }
 
-    public Grid.CellPair getCellPair(Grid.Cell c1, Grid.Cell c2) {
+    /**
+     * returns a <code>CellPair</code> as specified by the two cells
+     *
+     * @param c1 first Cell
+     * @param c2 second Cell
+     * @return the CellPair consistent of the two above mentioned Cells
+     */
+    public CellPair getCellPair(Cell c1, Cell c2) {
 
         return grid.getCellPair(c1, c2);
 
     }
 
-    //TODO
-    public float distance(Grid.Cell c1, Grid.Cell c2) {
+    /**
+     * calls the method that calculates the distance between
+     * two cells in <code>Grid</code>
+     *
+     * @param c1 Cell 1
+     * @param c2 Cell 2
+     * @return the distance in float
+     * @see Grid#distance(Cell, Cell)
+     */
+    public float distance(Cell c1, Cell c2) {
         return grid.distance(c1, c2);
     }
 
-    //TODO
-    public float distance(Grid.Cell c1, HashSet<Grid.Cell> c2) {
+    /**
+     * calls the method that calculates the distance between a cell
+     * and a Set of cells in <code>Grid</code>
+     *
+     * @param c1 Cell 1
+     * @param c2 Cell 2
+     * @return the distance in float
+     * @see Grid#distance(Cell, HashSet)
+     */
+    public float distance(Cell c1, HashSet<Cell> c2) {
         return grid.distance(c1, c2);
     }
 
-    // TODO: Javadocs
-    public void addRoom(Grid.Cell leftUp, Grid.Cell rightDown) {
+    /**
+     * adds a new Room to the Building
+     *
+     * @param leftUp    the cell of the left upper part of the room
+     * @param rightDown the cell of the right lower part of the room
+     */
+    public void addRoom(Cell leftUp, Cell rightDown) {
         rooms.add(new Room(leftUp, rightDown));
     }
 
-    // TODO: Javadocs
-    private void addRoom(Grid.Cell leftUp, Grid.Cell rightDown, int id) {
+    /**
+     * adds a Room including its id. Can only be called from this class and will be
+     * used if a building gets rebuilt from a JSON file.
+     *
+     * @param leftUp    the cell of the left upper part of the room
+     * @param rightDown the cell of the right lower part of the room
+     * @param id        the rooms unique id
+     */
+    private void addRoom(Cell leftUp, Cell rightDown, int id) {
         rooms.add(new Room(leftUp, rightDown, id));
     }
 
-    //TODO
+    /**
+     * creates a Building from a JSON file by using a <code>Gson</code>
+     *
+     * @param json the JSON file
+     * @return the created Building
+     */
     public static Building fromJSON(File json) {
 
         try {
@@ -256,14 +345,20 @@ public class Building {
 
     }
 
-    //TODO
+    /**
+     * calculates a Building from a JSON String
+     *
+     * @param json the String that specifies the Building
+     * @return the Building expressed by the String
+     * @see Building#fromJSON(File)
+     */
     public static Building fromJSON(String json) {
 
         try {
             GsonBuilder gb = new GsonBuilder();
             gb.registerTypeAdapter(Building.class, new BuildingInstanceCreator());
             Gson gson = gb.create();
-            return gson.fromJson(new FileReader(json), Building.class);
+            return gson.fromJson(json, Building.class);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -272,23 +367,26 @@ public class Building {
 
     }
 
+    /**
+     * creates a new JSON-File from this Building
+     */
     public void makeJSONfile() {
         String json = toJSONstring();
-        String name = this.name.replaceAll("\\s+","");
+        String name = this.name.replaceAll("\\s+", "");
 
         ClassLoader cl = getClass().getClassLoader();
         String resourcePath = cl.getResource("buildingsJson").getPath();
 
 
         File file = new File(resourcePath + "/" + name + ".json");
-        if(!file.exists()) {
+        if (!file.exists()) {
             try {
                 file.createNewFile();
                 file.setWritable(true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else{
+        } else {
             System.err.println("File already exists");
         }
         try {
@@ -301,7 +399,10 @@ public class Building {
         }
     }
 
-    public String toJSONstring() {
+    /**
+     * @return the String that specifies this Building as a JSON
+     */
+    private String toJSONstring() {
 
         String json = null;
         try {
@@ -315,58 +416,81 @@ public class Building {
 
     }
 
-    // TODO: Javadocs
-    public void addDoor(HashSet<Grid.CellPair> connectedCells) {
+    /**
+     * adds a Door to the Building using the connected cells of this Door.
+     *
+     * @param connectedCells a Set of CellPairs of Cells that are directly connected
+     */
+    public void addDoor(HashSet<CellPair> connectedCells) {
         Door door = new Door(connectedCells);
         doors.add(door);
 
-        if (door.isExit()) {
-            Room room = door.getExitRoom();
-            room.addExit(door);
-            exits.add(door);
-            entryCells.addAll(door.getRoomChangingCells(null));
-        }
+        addExit(door);
     }
 
-    // TODO: Javadocs
-    private void addDoor(HashSet<Grid.CellPair> connectedCells, int id) {
+    /**
+     * adds a Door to this Building using the connected Cells of this Door.
+     * The id is already specified, so that this Method will only be used
+     * when rebuilding an already existing Building.
+     *
+     * @param connectedCells Pairs of cells that are connected, are in different rooms
+     *                       and belong to this Door
+     * @param id             the id of this Door
+     */
+    private void addDoor(HashSet<CellPair> connectedCells, int id) {
         Door door = new Door(connectedCells, id);
         doors.add(door);
 
-        if (door.isExit()) {
-            Room room = door.getExitRoom();
-            room.addExit(door);
-            exits.add(door);
-            entryCells.addAll(door.getRoomChangingCells(null));
-        }
+        addExit(door);
     }
 
-    public void addStair(LinkedList<Grid.Cell> stairCells, int direction) {
+    /**
+     * adds a stair to this building. a Stair is specified by the cells belonging
+     * to the stair and the direction of the stair.
+     *
+     * @param stairCells the cells that are occupied by this stair
+     * @param direction  the direction in which you can use the stair
+     */
+    public void addStair(LinkedList<Cell> stairCells, int direction) {
 
         Stair stair = new Stair(stairCells, direction);
         stairs.add(stair);
 
-        if (stair.isExit()) {
-            Room room = stair.getExitRoom();
-            room.addExit(stair);
-            exits.add(stair);
-            entryCells.addAll(stair.getRoomChangingCells(null));
-        }
+        addExit(stair);
 
     }
 
-    private void addStair(LinkedList<Grid.Cell> stairCells, int direction, int id) {
+    /**
+     * adds a stair to this building. a Stair is specified by the cells belonging
+     * to the stair and the direction of the stair. This method is called when the
+     * id is already known, when a building is rebuilt from a JSON file
+     *
+     * @param stairCells the cells that are occupied by this stair
+     * @param direction  the direction in which you can use the stair
+     * @param id         the id of this Stair
+     */
+    private void addStair(LinkedList<Cell> stairCells, int direction, int id) {
 
         Stair stair = new Stair(stairCells, direction, id);
         stairs.add(stair);
 
-        if (stair.isExit()) {
-            Room room = stair.getExitRoom();
-            room.addExit(stair);
-            exits.add(stair);
-            entryCells.addAll(stair.getRoomChangingCells(null));
-        }
+        addExit(stair);
 
+    }
+
+    /**
+     * checks whether a given passage is an exit, and if it is, adds this passage
+     * to the list of exits
+     *
+     * @param passage the passage to be checked
+     */
+    private void addExit(Passage passage) {
+        if (passage.isExit()) {
+            Room room = passage.getExitRoom();
+            room.addExit(passage);
+            exits.add(passage);
+            entryCells.addAll(passage.getRoomChangingCells(null));
+        }
     }
 
     /**
@@ -411,7 +535,7 @@ public class Building {
      * @return all cells of the grid which allow entering the building, eg that are part
      * of an exit and are located outside the building.
      */
-    public HashSet<Grid.Cell> getEntryCells() {
+    public HashSet<Cell> getEntryCells() {
         return new HashSet<>(entryCells);
     }
 
@@ -444,7 +568,10 @@ public class Building {
         return new HashSet<>(personsInBuilding);
     }
 
-    public void updateNumberOfPeople(int number) {
+    /**
+     * @param number the number to which the average capacity of this building shall be set
+     */
+    public void setAverageCapacity(int number) {
         this.averageCapacity = number;
     }
 
@@ -465,6 +592,9 @@ public class Building {
 
     }
 
+    /**
+     * @return the actual evacuation Strategy of the building
+     */
     public EvacuationStrategy getEvacuationStrategy() {
         return evacuationStrategy;
     }
@@ -494,12 +624,7 @@ public class Building {
         grid.unblock();
         LinkedList<Person> personCopy = new LinkedList<>(personsInBuilding);
         // persons who are in the building the longest are first
-        personCopy.sort(new Comparator<Person>() {
-            @Override
-            public int compare(Person o1, Person o2) {
-                return o1.getId() - o2.getId();
-            }
-        });
+        personCopy.sort(Comparator.comparingInt(Person::getId));
         // lets persons leave the building with some earlier defined probability
         // <code>pDeletePerson</code>
         while (true) {
@@ -540,7 +665,7 @@ public class Building {
         if (Math.random() < pAdd) {
 
             if (Math.random() < pDisabled) {
-                for (Grid.Cell cell : getEntryCells()) {
+                for (Cell cell : getEntryCells()) {
                     if (!cell.isOccupied() && !cell.isStair()) {
                         addPerson(new Person(true, this));
                         break;
@@ -549,7 +674,7 @@ public class Building {
             } else {
 
 
-                for (Grid.Cell cell : getEntryCells()) {
+                for (Cell cell : getEntryCells()) {
                     if (!cell.isOccupied()) {
                         addPerson(new Person(false, this));
                         break;
@@ -576,17 +701,10 @@ public class Building {
          */
         public final int id;
 
-        //TODO
-        transient boolean exit;
-
         /**
-         * constructor that only assigns the ID
+         * states whether this Passage is an exit
          */
-        public Passage() {
-
-            this.id = passageNumber++;
-
-        }
+        transient boolean exit;
 
         /**
          * constructor that only assigns the ID
@@ -636,14 +754,14 @@ public class Building {
         /**
          * @return all cells that can be used to change the room
          */
-        public abstract HashSet<Grid.Cell> getRoomChangingCells();
+        public abstract HashSet<Cell> getRoomChangingCells();
 
         /**
          * @param room the room in which the cells should be
          * @return all cells that belong to this passage and are in the
          * specified room
          */
-        public abstract HashSet<Grid.Cell> getRoomChangingCells(Room room);
+        public abstract HashSet<Cell> getRoomChangingCells(Room room);
 
         /**
          * @return null if the passage is no exit; else the room in which
@@ -686,26 +804,26 @@ public class Building {
          * all the cell-pairs that belong to the passage;
          * all cells that are connected.
          */
-        HashSet<Grid.CellPair> connectedCells;
+        HashSet<CellPair> connectedCells;
 
         /**
          * all cells that are on the outside.
          * outside is assigned randomly; in case this is an exit,
          * outside will be the cells outside the building.
          */
-        transient Pair<Room, HashSet<Grid.Cell>> outsideCells;
+        transient Pair<Room, HashSet<Cell>> outsideCells;
         /**
          * all cells that are on the inside.
          * inside is assigned randomly; in case this is an exit,
          * inside will be the cells inside the building.
          */
-        transient Pair<Room, HashSet<Grid.Cell>> insideCells;
+        transient Pair<Room, HashSet<Cell>> insideCells;
 
         /**
          * all single cells that this door consists of. In difference to
          * connectedCells, this returns single cells, no cellPairs.
          */
-        transient HashSet<Grid.Cell> roomChangingCells;
+        transient HashSet<Cell> roomChangingCells;
 
         /**
          * constructor that builds a door depending on the connectedCells,
@@ -716,58 +834,9 @@ public class Building {
          *                       directly connected and that are on both sides
          *                       of the door.
          */
-        Door(HashSet<Grid.CellPair> connectedCells) {
+        Door(HashSet<CellPair> connectedCells) {
 
-            // calls super method which assigns an id.
-            super();
-            this.connectedCells = connectedCells;
-
-            // updates outside and inside Cells
-            LinkedList<Grid.Cell> outside = new LinkedList<>();
-            LinkedList<Grid.Cell> inside = new LinkedList<>();
-
-            for (Grid.CellPair fp : connectedCells) {
-                outside.add(fp.getCell1());
-                inside.add(fp.getCell2());
-            }
-
-            // gets common Room of outside- and insideCells.
-            // method throws an exception if not all cells are in the same room
-            Room outsideRoom = grid.getRoom(outside);
-            Room insideRoom = grid.getRoom(inside);
-
-            // adds the Passage to the rooms.
-            if (outsideRoom != null) outsideRoom.addPassage(this);
-            if (insideRoom != null) insideRoom.addPassage(this);
-
-            this.connectsInOut = new Pair<>(insideRoom, outsideRoom);
-
-            this.outsideCells = new Pair<>(outsideRoom, new HashSet<>(outside));
-            this.insideCells = new Pair<>(insideRoom, new HashSet<>(inside));
-
-            roomChangingCells = new HashSet<>();
-            roomChangingCells.addAll(outside);
-            roomChangingCells.addAll(inside);
-
-            if (outsideRoom == null ^ insideRoom == null) {
-
-                exit = true;
-
-                if (connectsInOut.getKey() == null) {
-                    connectsInOut = new Pair<>(connectsInOut.getValue(), connectsInOut.getKey());
-                    HashSet<Grid.Cell> temp = new HashSet<>(insideCells.getValue());
-                    insideCells = outsideCells;
-                    outsideCells = new Pair<>(null, temp);
-                }
-                if (connectsInOut.getValue() != null) {
-                    throw new IllegalArgumentException("no Exit");
-                }
-            } else if (outsideRoom == null && insideRoom == null) {
-                throw new IllegalStateException("This passage seems to go nowhere");
-            } else {
-                exit = false;
-            }
-
+            this(connectedCells, passageNumber++);
         }
 
         /**
@@ -779,17 +848,17 @@ public class Building {
          *                       directly connected and that are on both sides
          *                       of the door.
          */
-        private Door(HashSet<Grid.CellPair> connectedCells, int id) {
+        private Door(HashSet<CellPair> connectedCells, int id) {
 
             // calls super method which assigns an id.
             super(id);
             this.connectedCells = connectedCells;
 
             // updates outside and inside Cells
-            LinkedList<Grid.Cell> outside = new LinkedList<>();
-            LinkedList<Grid.Cell> inside = new LinkedList<>();
+            LinkedList<Cell> outside = new LinkedList<>();
+            LinkedList<Cell> inside = new LinkedList<>();
 
-            for (Grid.CellPair fp : connectedCells) {
+            for (CellPair fp : connectedCells) {
                 outside.add(fp.getCell1());
                 inside.add(fp.getCell2());
             }
@@ -818,14 +887,14 @@ public class Building {
 
                 if (connectsInOut.getKey() == null) {
                     connectsInOut = new Pair<>(connectsInOut.getValue(), connectsInOut.getKey());
-                    HashSet<Grid.Cell> temp = new HashSet<>(insideCells.getValue());
+                    HashSet<Cell> temp = new HashSet<>(insideCells.getValue());
                     insideCells = outsideCells;
                     outsideCells = new Pair<>(null, temp);
                 }
                 if (connectsInOut.getValue() != null) {
                     throw new IllegalArgumentException("no Exit");
                 }
-            } else if (outsideRoom == null && insideRoom == null) {
+            } else if (outsideRoom == null) {
                 throw new IllegalStateException("This passage seems to go nowhere");
             } else {
                 exit = false;
@@ -839,19 +908,19 @@ public class Building {
         }
 
         @Override
-        public HashSet<Grid.Cell> getRoomChangingCells() {
+        public HashSet<Cell> getRoomChangingCells() {
             return new HashSet<>(roomChangingCells);
         }
 
         /**
          * @return all the connected Cells from the connectedCells HashSet
          */
-        public HashSet<Grid.CellPair> getConnectedCells() {
+        public HashSet<CellPair> getConnectedCells() {
             return new HashSet<>(connectedCells);
         }
 
         /**
-         * @return null, since there is no exit-room for a door unless it's an exit
+         * @return if this is an exit, return the room from which the exit is accessible
          */
         @Override
         public Room getExitRoom() {
@@ -867,7 +936,7 @@ public class Building {
          * is not part of the door, returns the cells outside the building if room is null
          */
         @Override
-        public HashSet<Grid.Cell> getRoomChangingCells(Room room) {
+        public HashSet<Cell> getRoomChangingCells(Room room) {
             if (room != null) {
                 if (room.equals(insideCells.getKey())) {
                     return new HashSet<>(insideCells.getValue());
@@ -915,51 +984,54 @@ public class Building {
          */
         transient Pair<Room, Room> connectsInOut;
 
-
-        //TODO
-        LinkedList<Grid.Cell> stairCells;
+        /**
+         * the list of cells that are occupied by this stair
+         */
+        LinkedList<Cell> stairCells;
         /**
          * the cells where the actual stair is
          */
-        transient Pair<Room, HashSet<Grid.Cell>> stairCellsPair;
+        transient Pair<Room, HashSet<Cell>> stairCellsPair;
         /**
          * the cells inside (inside has only a meaning if this is an exit)
          */
-        transient Pair<Room, HashSet<Grid.Cell>> insideCells;
+        transient Pair<Room, HashSet<Cell>> insideCells;
         /**
          * the cells outside (outside has only a meaning if this is an exit, in this
          * case, the Key of this pair is null)
          */
-        transient Pair<Room, HashSet<Grid.Cell>> outsideCells;
+        transient Pair<Room, HashSet<Cell>> outsideCells;
         /**
          * all cells from which you can change the room
          */
-        transient HashSet<Grid.Cell> roomChangingCells;
+        transient HashSet<Cell> roomChangingCells;
         /**
          * the direction you walk to go up/down the street
          */
         int direction;
 
         /**
-         * constructor that constructs a stair based on its cells and the direction.
+         * constructor that constructs a stair based on its cells and the direction, as
+         * well as the id.
          *
-         * @param stairCellsPair
-         * @param direction
+         * @param stairCells the cells that are occupied by this stair
+         * @param direction  the direction of the stair
+         * @param id         the id of this passage
          */
-        private Stair(LinkedList<Grid.Cell> stairCellsPair, int direction, int id) {
+        private Stair(LinkedList<Cell> stairCells, int direction, int id) {
 
             super(id);
             this.direction = direction;
-            this.stairCells = new LinkedList<>(stairCellsPair);
+            this.stairCells = new LinkedList<>(stairCells);
 
-            LinkedList<Grid.Cell> inside = new LinkedList<>();
-            LinkedList<Grid.Cell> outside = new LinkedList<>();
+            LinkedList<Cell> inside = new LinkedList<>();
+            LinkedList<Cell> outside = new LinkedList<>();
 
-            for (Grid.Cell cell : stairCellsPair) {
-                if (!stairCellsPair.contains(cell.getNextCell(direction))) {
+            for (Cell cell : stairCells) {
+                if (!stairCells.contains(cell.getNextCell(direction))) {
                     inside.add(cell.getNextCell(direction));
                 }
-                if (!stairCellsPair.contains(cell.getNextCell(DIR.getComplement(direction)))) {
+                if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
                     outside.add(cell.getNextCell(DIR.getComplement(direction)));
                 }
                 cell.setStair();
@@ -967,9 +1039,9 @@ public class Building {
             }
             Room outsideRoom = grid.getRoom(outside);
             Room insideRoom = grid.getRoom(inside);
-            Room stairRoom = grid.getRoom(stairCellsPair);
-            this.stairCellsPair = new Pair<>(stairRoom, new HashSet<>(stairCellsPair));
-            roomChangingCells = new HashSet<>(stairCellsPair);
+            Room stairRoom = grid.getRoom(stairCells);
+            this.stairCellsPair = new Pair<>(stairRoom, new HashSet<>(stairCells));
+            roomChangingCells = new HashSet<>(stairCells);
             exit = false;
 
             if (stairRoom == null) {
@@ -1006,70 +1078,19 @@ public class Building {
         /**
          * constructor that constructs a stair based on its cells and the direction.
          *
-         * @param stairCellsPair
-         * @param direction
+         * @param stairCells the cells that are occupied by this stair
+         * @param direction  the direction of this stair
          */
-        public Stair(LinkedList<Grid.Cell> stairCellsPair, int direction) {
+        Stair(LinkedList<Cell> stairCells, int direction) {
 
-            super();
-            this.direction = direction;
-            this.stairCells = new LinkedList<>(stairCellsPair);
-
-            LinkedList<Grid.Cell> inside = new LinkedList<>();
-            LinkedList<Grid.Cell> outside = new LinkedList<>();
-
-            for (Grid.Cell cell : stairCellsPair) {
-                if (!stairCellsPair.contains(cell.getNextCell(direction))) {
-                    inside.add(cell.getNextCell(direction));
-                }
-                if (!stairCellsPair.contains(cell.getNextCell(DIR.getComplement(direction)))) {
-                    outside.add(cell.getNextCell(DIR.getComplement(direction)));
-                }
-                cell.setStair();
-
-            }
-            Room outsideRoom = grid.getRoom(outside);
-            Room insideRoom = grid.getRoom(inside);
-            Room stairRoom = grid.getRoom(stairCellsPair);
-            this.stairCellsPair = new Pair<>(stairRoom, new HashSet<>(stairCellsPair));
-            roomChangingCells = new HashSet<>(stairCellsPair);
-            exit = false;
-
-            if (stairRoom == null) {
-                exit = true;
-                if (outsideRoom == null && insideRoom != null) {
-                    roomChangingCells.addAll(inside);
-                } else if (outsideRoom != null && insideRoom == null) {
-                    roomChangingCells.addAll(outside);
-                } else throw new IllegalArgumentException();
-            } else if (outsideRoom == null || insideRoom == null) {
-                exit = true;
-                if (outsideRoom == null && insideRoom != null) {
-                    roomChangingCells.addAll(outside);
-                } else if (outsideRoom != null /* && insideRoom == null */) {
-                    roomChangingCells.addAll(inside);
-                } else throw new IllegalArgumentException();
-            }
-
-            if (outsideRoom != null) outsideRoom.addPassage(this);
-            if (insideRoom != null) insideRoom.addPassage(this);
-
-            if (exit && insideRoom == null) {
-                this.connectsInOut = new Pair<>(outsideRoom, null);
-                this.insideCells = new Pair<>(outsideRoom, new HashSet<>(outside));
-                this.outsideCells = new Pair<>(null, new HashSet<>(inside));
-            } else {
-                this.connectsInOut = new Pair<>(insideRoom, outsideRoom);
-                this.insideCells = new Pair<>(insideRoom, new HashSet<>(inside));
-                this.outsideCells = new Pair<>(outsideRoom, new HashSet<>(outside));
-            }
+            this(stairCells, direction, passageNumber++);
 
         }
 
         /**
          * @return the cells that belong to the stair
          */
-        public Pair<Room, HashSet<Grid.Cell>> getStairCellsPair() {
+        public Pair<Room, HashSet<Cell>> getStairCellsPair() {
             return new Pair<>(stairCellsPair.getKey(), new HashSet<>(stairCellsPair.getValue()));
         }
 
@@ -1077,7 +1098,7 @@ public class Building {
          * @return the cells that belong to the "inside", which has only a meaning if this is an exit
          * else: cells from a random side
          */
-        public Pair<Room, HashSet<Grid.Cell>> getInsideCells() {
+        public Pair<Room, HashSet<Cell>> getInsideCells() {
             return new Pair<>(insideCells.getKey(), new HashSet<>(insideCells.getValue()));
         }
 
@@ -1085,7 +1106,7 @@ public class Building {
          * @return the cells that belong to the "outside", which has only a meaning if this is an exit
          * else: cells from a random side
          */
-        public Pair<Room, HashSet<Grid.Cell>> getOutsideCells() {
+        public Pair<Room, HashSet<Cell>> getOutsideCells() {
             return new Pair<>(outsideCells.getKey(), new HashSet<>(outsideCells.getValue()));
         }
 
@@ -1097,9 +1118,7 @@ public class Building {
         }
 
         /**
-         * it's not an ExitStair
-         *
-         * @return null, because this is not an exit
+         * if this is an Exit, return the room in from which the exit is accessible
          */
         @Override
         public Room getExitRoom() {
@@ -1120,12 +1139,12 @@ public class Building {
         }
 
         @Override
-        public HashSet<Grid.Cell> getRoomChangingCells() {
+        public HashSet<Cell> getRoomChangingCells() {
             return new HashSet<>(roomChangingCells);
         }
 
         @Override
-        public HashSet<Grid.Cell> getRoomChangingCells(Room room) {
+        public HashSet<Cell> getRoomChangingCells(Room room) {
             if (room != null) {
                 if (room.equals(insideCells.getKey())) {
                     if (insideCells.getKey().equals(stairCellsPair.getKey())) {
@@ -1165,15 +1184,15 @@ public class Building {
         /**
          * cell in the left upper corner
          */
-        private Grid.Cell beginning;
+        private Cell beginning;
         /**
          * cell in the right lower corner
          */
-        private Grid.Cell end;
+        private Cell end;
         /**
          * the Room's unique id
          */
-        public final int id;
+        final int id;
         /**
          * a <code>HashSet</code> that contains all passages that belong to
          * this room and are no exits.
@@ -1186,52 +1205,40 @@ public class Building {
         /**
          * a <code>HashSet</code> that contains every cell of this room.
          */
-        private transient HashSet<Grid.Cell> cells;
+        private transient HashSet<Cell> cells;
 
 
-        private Room(Grid.Cell beginning, Grid.Cell end, int id, HashSet<Passage> passages, HashSet<Passage> exits) {
+        /**
+         * constructor that builds up a new Room. Also assigns room to each cell that belongs
+         * to this room. It already gets the id.
+         *
+         * @param beginning left upper grid-Cell
+         * @param end       right lower grid-Cell
+         * @param id        the id of this room
+         */
+        private Room(Cell beginning, Cell end, int id) {
 
             this.beginning = beginning;
             this.end = end;
-            this.passages = passages;
-            this.exits = exits;
+            this.passages = new HashSet<>();
+            this.exits = new HashSet<>();
             this.id = id;
             cells = calculateCells();
 
-            for (Grid.Cell cell : cells) {
+            for (Cell cell : cells) {
                 cell.setRoom(this);
             }
 
         }
 
         /**
-         * constructor that builds up a new Room. Also assigns room to each cell that belongs
-         * to this room.
-         *
-         * @param beginning left upper grid-Cell
-         * @param end       right lower grid-Cell
-         * @param passages  all the Passages that lead to or from this room
-         *                  except the exits.
-         * @param exits     all the exits that leave from this room
-         */
-        public Room(Grid.Cell beginning, Grid.Cell end, HashSet<Passage> passages, HashSet<Passage> exits) {
-            this(beginning, end, roomNumber++, passages, exits);
-        }
-
-        /**
-         * specifies a room without any passages
+         * specifies a new room
          *
          * @param beginning left upper grid-Cell
          * @param end       right lower grid-Cell
          */
-        public Room(Grid.Cell beginning, Grid.Cell end) {
-            this(beginning, end, new HashSet<>(), new HashSet<>());
-        }
-
-
-        //TODO
-        private Room(Grid.Cell beginning, Grid.Cell end, int id) {
-            this(beginning, end, id, new HashSet<>(), new HashSet<>());
+        Room(Cell beginning, Cell end) {
+            this(beginning, end, roomNumber++);
         }
 
         /**
@@ -1239,9 +1246,9 @@ public class Building {
          *
          * @return the <code>HashSet</code> that contains all Cells in this room
          */
-        private HashSet<Grid.Cell> calculateCells() {
+        private HashSet<Cell> calculateCells() {
 
-            HashSet<Grid.Cell> tempCells = new HashSet<>();
+            HashSet<Cell> tempCells = new HashSet<>();
             for (int i = beginning.getX(); i <= end.getX(); i++) {
                 for (int j = beginning.getY(); j <= end.getY(); j++) {
 
@@ -1257,7 +1264,7 @@ public class Building {
          *
          * @param newPassage passage to be added to this room.
          */
-        public void addPassage(Passage newPassage) {
+        void addPassage(Passage newPassage) {
             passages.add(newPassage);
         }
 
@@ -1266,7 +1273,7 @@ public class Building {
          *
          * @param exit that will be added.
          */
-        public void addExit(Passage exit) {
+        void addExit(Passage exit) {
             exits.add(exit);
         }
 
@@ -1295,14 +1302,14 @@ public class Building {
         /**
          * @return the left upper corner of this Room
          */
-        public Grid.Cell getBeginning() {
+        public Cell getBeginning() {
             return beginning;
         }
 
         /**
          * @return the right lower corner of this Room
          */
-        public Grid.Cell getEnd() {
+        public Cell getEnd() {
             return end;
         }
 
@@ -1313,8 +1320,15 @@ public class Building {
             return new HashSet<>(passages);
         }
 
-        //TODO
-        public boolean isPassage(Grid.Cell cell1, Grid.Cell cell2) {
+        /**
+         * calculates this room has a passage that can be passed by changing from
+         * one cell to the other one
+         *
+         * @param cell1 first Cell
+         * @param cell2 second Cell
+         * @return whether there is a passage between the two
+         */
+        public boolean isPassage(Cell cell1, Cell cell2) {
             if (!cell1.getRoom().equals(cell2.getRoom())) {
                 for (Passage passage : passages) {
                     if (passage.getRoomChangingCells().contains(cell1) &&
@@ -1375,33 +1389,51 @@ public class Building {
             return building;
         }
 
+        /**
+         * creates a new Room from a json-fragment describing a room
+         *
+         * @param json the json that represents the room
+         * @param building the building this room will be added to
+         */
         private void deserializeRoom(JsonObject json, Building building) {
             int id = json.get("id").getAsInt();
-            Grid.Cell beginning = deserializeCell(json.getAsJsonObject("beginning"), building);
-            Grid.Cell end = deserializeCell(json.getAsJsonObject("end"), building);
+            Cell beginning = deserializeCell(json.getAsJsonObject("beginning"), building);
+            Cell end = deserializeCell(json.getAsJsonObject("end"), building);
             building.addRoom(beginning, end, id);
         }
 
+        /**
+         * creates a new Door from a json-fragment describing a Door
+         *
+         * @param json the json that represents the Door
+         * @param building the building this Door will be added to
+         */
         private void deserializeDoor(JsonObject json, Building building) {
             int id = json.get("id").getAsInt();
 
-            HashSet<Grid.CellPair> connectedCells = new HashSet<>();
+            HashSet<CellPair> connectedCells = new HashSet<>();
             JsonArray tempCellPairs = json.getAsJsonArray("connectedCells");
             for (JsonElement temp : tempCellPairs) {
                 JsonObject tempCellPair = temp.getAsJsonObject();
-                Grid.Cell cell1 = deserializeCell(tempCellPair.getAsJsonObject("cell1"), building);
-                Grid.Cell cell2 = deserializeCell(tempCellPair.getAsJsonObject("cell2"), building);
+                Cell cell1 = deserializeCell(tempCellPair.getAsJsonObject("cell1"), building);
+                Cell cell2 = deserializeCell(tempCellPair.getAsJsonObject("cell2"), building);
                 connectedCells.add(building.getGrid().getCellPair(cell1, cell2));
             }
             building.addDoor(connectedCells, id);
 
         }
 
+        /**
+         * creates a new Stair from a json-fragment describing a Stair
+         *
+         * @param json the json that represents the Stair
+         * @param building the building this Stair will be added to
+         */
         private void deserializeStair(JsonObject json, Building building) {
             int id = json.get("id").getAsInt();
             int direction = json.get("direction").getAsInt();
 
-            LinkedList<Grid.Cell> stairCells = new LinkedList<>();
+            LinkedList<Cell> stairCells = new LinkedList<>();
             JsonArray tempStairCells = json.getAsJsonArray("stairCells");
             for (JsonElement temp : tempStairCells) {
                 JsonObject tempCell = temp.getAsJsonObject();
@@ -1410,7 +1442,13 @@ public class Building {
             building.addStair(stairCells, direction, id);
         }
 
-        private Grid.Cell deserializeCell(JsonObject tempCell, Building building) {
+        /**
+         * creates a new Cell from a json-fragment describing a Cell
+         *
+         * @param tempCell the json that represents the Stair
+         * @param building the building this Stair will be added to
+         */
+        private Cell deserializeCell(JsonObject tempCell, Building building) {
             return building.getCell(tempCell.get("x").getAsInt(), tempCell.get("y").getAsInt());
         }
     }

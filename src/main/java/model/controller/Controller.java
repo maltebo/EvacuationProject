@@ -89,7 +89,7 @@ public class Controller implements Runnable {
     public void adjustNumberOfPeople(int number) {
         if (number >= 0 && number < 500) {
             this.numberOfPeople = number;
-            building.updateNumberOfPeople(number);
+            building.setAverageCapacity(number);
         } else {
             throw new IllegalArgumentException();
         }
@@ -160,7 +160,7 @@ public class Controller implements Runnable {
 
         emergency = false;
         building = Building.fromJSON(file);
-        building.updateNumberOfPeople(numberOfPeople);
+        building.setAverageCapacity(numberOfPeople);
         buildingRepresentation = new BuildingRepresentation(building);
         window.changeBuilding(buildingRepresentation);
         state = STATE.PAUSE;

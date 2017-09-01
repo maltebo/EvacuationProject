@@ -2,7 +2,6 @@ package model.graph;
 
 import model.graph.building.Grid;
 import model.graph.building.Building;
-import model.helper.Logger;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -49,7 +48,6 @@ public class PathOntology {
         this.grid = building.getGrid();
         initializePaths();
         initializeDisabledPaths();
-        Logger.print(getShortestPath(grid.getCell(14,5), null, true));
     }
 
     /**
@@ -92,7 +90,7 @@ public class PathOntology {
             for (Building.Passage p2 : allPassages) {
 
                 LinkedList<Building.Passage> temp = new LinkedList<>();
-                    temp.add(p1);
+                temp.add(p1);
                 if (!p1.equals(p2)) {
                     temp.add(p2);
                 }
@@ -187,6 +185,7 @@ public class PathOntology {
 
     /**
      * calculates the direct distance between two passages
+     *
      * @param p1 the first passage
      * @param p2 the second passage
      * @return 0, if both passages are identical; (integer)-infinity, if they are not connected via a room;
@@ -203,12 +202,10 @@ public class PathOntology {
 
             HashSet<Grid.Cell> p1Cells = p1.getRoomChangingCells(connection);
             HashSet<Grid.Cell> p2Cells = p2.getRoomChangingCells(connection);
-            for (Grid.Cell f1 : p1Cells) {
-                for (Grid.Cell f2 : p2Cells) {
-                    distance += building.distance(f1,f2);
-                }
+            for (Grid.Cell c1 : p1Cells) {
+                distance += building.distance(c1, p2Cells);
             }
-            return distance / (p1Cells.size() * p2Cells.size());
+            return distance / p1Cells.size();
 
         }
         return Integer.MAX_VALUE;
@@ -216,8 +213,9 @@ public class PathOntology {
 
     /**
      * retruns the shortest path for a person, depending on the position and whether the person is disabled or not.
-     * @param start the actual cell of the person
-     * @param end the room the person wants to get to
+     *
+     * @param start    the actual cell of the person
+     * @param end      the room the person wants to get to
      * @param disabled a boolean; whether the person is disabled or not
      * @return the shortest path for this person
      */
@@ -272,7 +270,7 @@ public class PathOntology {
                 }
 
                 // if those costs are lower than the costs of our temporal Path
-                if(costs < temp.getCosts()) {
+                if (costs < temp.getCosts()) {
                     // temp will become a new Path, that is, the shortest path between the
                     // found Passages + the costs we estimated
                     if (disabled) {
@@ -293,6 +291,7 @@ public class PathOntology {
     /**
      * returns the shortest path for a disabled person between two passages
      * TODO: organize this like a non-disabled, make Passage etc. inner classes of a building
+     *
      * @param p1 first passage
      * @param p2 second passage
      * @return the shortest path without stairs
