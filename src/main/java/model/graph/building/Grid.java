@@ -1,45 +1,71 @@
 package model.graph.building;
 
 import model.helper.Pair;
+import model.graph.building.Building.*;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 
+/**
+ * a grid for a building, consists of cells.
+ *
+ * @author Malte
+ * @see Building
+ */
 public class Grid {
 
+    /**
+     * the size of the Grid in x- and y-Direction
+     */
     int xSize, ySize;
 
-    private final HashMap<Pair<Integer, Integer>, Cell> existingCells = new HashMap<>();
+    /**
+     * the number of Floors
+     */
+    int floors;
 
-    public Grid(Building building) {
+    /**
+     * all the existing cells in this grid (basically a Singleton, we do not want to create
+     * any cell twice
+     */
+    private final HashMap<Pair<Pair<Integer, Integer>, Integer>, Cell> existingCells = new HashMap<>();
+
+    Grid(Building building) {
 
         xSize = building.gridSizeX;
         ySize = building.gridSizeY;
+        floors = building.floors;
 
         for (int i = -1; i <= xSize; i++) {
             for (int j = -1; j <= ySize; j++) {
-                addCell(i,j);
+                for (int k = 0; k < floors; k++) {
+                    addCell(i, j, k);
+                }
             }
         }
 
     }
 
-    public Cell getCell(int x, int y) {
+    Cell getCell(int x, int y) {
 
-        Cell cell = existingCells.get(new Pair<>(x, y));
+        return getCell(x,y,0);
+
+    }
+
+    Cell getCell(int x, int y, int f) {
+        Cell cell = existingCells.get(new Pair<>(new Pair<>(x, y), f));
         if(cell == null) {
-            cell = addCell(x, y);
+            cell = addCell(x, y, f);
         }
         return cell;
-
     }
 
     public Cell getCell(Cell cell) {
 
-        Cell cell1 = existingCells.get(new Pair<>(cell.x, cell.y));
+        Cell cell1 = existingCells.get(new Pair<>(new Pair<>(cell.x, cell.y), cell.floor));
         if(cell1 == null) {
-            cell1 = addCell(cell.x, cell.y);
+            cell1 = addCell(cell.x, cell.y, cell.floor);
         }
         return cell1;
 
@@ -51,10 +77,10 @@ public class Grid {
 
     }
 
-    private Cell addCell(int x, int y) {
+    private Cell addCell(int x, int y, int f) {
 
-        Cell newCell = new Cell(x, y);
-        existingCells.put(new Pair<>(x, y), newCell);
+        Cell newCell = new Cell(x, y, f);
+        existingCells.put(new Pair<>(new Pair<>(x, y), f), newCell);
 
         return newCell;
 
@@ -69,10 +95,10 @@ public class Grid {
     }
 
 
-    public Building.Room getRoom(Collection<Cell> cells) {
+    public Room getRoom(Collection<Cell> cells) {
 
         boolean first = true;
-        Building.Room room = null;
+        Room room = null;
         for (Cell cell : cells) {
 
             if (first) {
@@ -94,9 +120,14 @@ public class Grid {
     }
 
     public int distance(Cell c1, Cell c2) {
-        int dX = Math.abs(c1.x - c2.x);
-        int dY = Math.abs(c1.y - c2.y);
-        return dX < dY ? dY : dX;
+        if (c1.floor == c2.floor) {
+            int dX = Math.abs(c1.x - c2.x);
+            int dY = Math.abs(c1.y - c2.y);
+            return dX < dY ? dY : dX;
+        } else {
+            //TODO
+            throw new IllegalStateException("Cells are not on same floor");
+        }
     }
 
 
@@ -115,8 +146,9 @@ public class Grid {
 
         private int x;
         private int y;
+        private int floor;
 
-        transient private Building.Room isInRoom = null;
+        transient private Room isInRoom = null;
 
         private transient boolean isStair = false;
 
@@ -124,16 +156,11 @@ public class Grid {
 
         private transient boolean isBlocked = false;
 
-        private Cell(int x, int y) {
+        private Cell (int x, int y, int floor) {
             this.x = x;
             this.y = y;
+            this.floor = floor;
         }
-
-        private Cell(Cell cell) {
-            this.x = cell.x;
-            this.y = cell.y;
-        }
-
 
         public int getX() {
             return x;
@@ -141,6 +168,10 @@ public class Grid {
 
         public int getY() {
             return y;
+        }
+
+        public int getFloor() {
+            return floor;
         }
 
 
@@ -165,13 +196,13 @@ public class Grid {
         }
 
 
-        public void setRoom(Building.Room isInRoom) {
+        void setRoom(Room isInRoom) {
             if (this.isInRoom == null) {
                 this.isInRoom = isInRoom;
             } else throw new IllegalStateException("Cell is already in a room!");
         }
 
-        public Building.Room getRoom() {
+        public Room getRoom() {
             return isInRoom;
         }
 
@@ -179,7 +210,7 @@ public class Grid {
             return isStair;
         }
 
-        public void setStair() {
+        void setStair() {
             isStair = true;
         }
 

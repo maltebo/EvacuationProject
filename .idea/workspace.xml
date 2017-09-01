@@ -2,21 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="14b776d4-9200-4e93-bf4f-1724f2afb036" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/PathOntology$2.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/PathOntology$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/PathOntology.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/PathOntology.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$1.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$BuildingInstanceCreator.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$BuildingInstanceCreator.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Door.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Door.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Passage.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Passage.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Room.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Room.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$STATE.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$STATE.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Stair.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building$Stair.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building.class" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/model/graph/building/Building.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/EvacuationProject4.1/buildingsJson/BuildingOne.json" afterPath="$PROJECT_DIR$/out/production/EvacuationProject4.1/buildingsJson/BuildingOne.json" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/building/Building.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/building/Building.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/useragent/MovementModule.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/useragent/MovementModule.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/buildingsJson/BuildingOne.json" afterPath="$PROJECT_DIR$/src/main/resources/buildingsJson/BuildingOne.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -62,10 +49,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Building.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Building.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/model/graph/building/Building.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="276">
+            <state relative-caret-position="-153">
               <caret line="197" column="5" lean-forward="false" selection-start-line="197" selection-start-column="5" selection-end-line="197" selection-end-column="5" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -75,6 +62,20 @@
                 <element signature="e#6398#6399#0" expanded="true" />
                 <element signature="e#17087#17088#0" expanded="true" />
                 <element signature="e#17128#17129#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Grid.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3060">
+              <caret line="212" column="8" lean-forward="false" selection-start-line="212" selection-start-column="8" selection-end-line="212" selection-end-column="8" />
+              <folding>
+                <element signature="imports" expanded="true" />
+                <element signature="e#3928#3929#0" expanded="true" />
+                <element signature="e#3964#3965#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -144,7 +145,6 @@
         <option value="$PROJECT_DIR$/src/main/java/model/representation/CoordCellPair.java" />
         <option value="$PROJECT_DIR$/src/main/java/model/representation/StatisticsBuildingView.java" />
         <option value="$PROJECT_DIR$/src/main/java/model/representation/Window.java" />
-        <option value="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" />
         <option value="$PROJECT_DIR$/src/main/java/model/graph/building/BuildingWithPeople.java" />
         <option value="$PROJECT_DIR$/src/main/java/model/helper/Logger.java" />
         <option value="$PROJECT_DIR$/src/main/java/model/representation/BuildingRepresentation.java" />
@@ -159,6 +159,7 @@
         <option value="$PROJECT_DIR$/src/main/resources/buildingsJson/BuildingOne.json" />
         <option value="$PROJECT_DIR$/out/production/EvacuationProject4.1/buildingsJson/BuildingOne.json" />
         <option value="$PROJECT_DIR$/src/main/java/model/graph/building/Building.java" />
+        <option value="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" />
       </list>
     </option>
   </component>
@@ -267,6 +268,16 @@
               <item name="model" type="462c0819:PsiDirectoryNode" />
               <item name="graph" type="462c0819:PsiDirectoryNode" />
               <item name="building" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="EvacuationProject4.1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="EvacuationProject4.1" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="model" type="462c0819:PsiDirectoryNode" />
+              <item name="graph" type="462c0819:PsiDirectoryNode" />
+              <item name="evacuation" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="EvacuationProject4.1" type="b2602c69:ProjectViewProjectNode" />
@@ -769,7 +780,7 @@
       <workItem from="1503998361282" duration="27872000" />
       <workItem from="1504094385303" duration="12943000" />
       <workItem from="1504183985504" duration="10294000" />
-      <workItem from="1504256921513" duration="8017000" />
+      <workItem from="1504256921513" duration="9756000" />
     </task>
     <task id="LOCAL-00001" summary="Changes in EvacuationStrategy to avoid NullPointerExceptions">
       <created>1504258225733</created>
@@ -792,11 +803,18 @@
       <option name="project" value="LOCAL" />
       <updated>1504264353952</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="added floors to a building">
+      <created>1504265051758</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1504265051758</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="59630000" />
+    <option name="totallyTimeSpent" value="61369000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="59" y="195" width="1263" height="767" extended-state="0" />
@@ -815,10 +833,10 @@
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32973805" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.36117935" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.36117935" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32973805" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.33087632" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33087632" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -842,7 +860,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Changes in EvacuationStrategy to avoid NullPointerExceptions" />
     <MESSAGE value="Comments and minor changes on code" />
-    <option name="LAST_COMMIT_MESSAGE" value="Comments and minor changes on code" />
+    <MESSAGE value="added floors to a building" />
+    <option name="LAST_COMMIT_MESSAGE" value="added floors to a building" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -857,6 +876,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -917,6 +937,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
           <caret line="24" column="52" lean-forward="false" selection-start-line="24" selection-start-column="52" selection-end-line="24" selection-end-column="52" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -934,6 +957,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
           <caret line="3" column="13" lean-forward="false" selection-start-line="3" selection-start-column="13" selection-end-line="3" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1005,6 +1029,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="8" lean-forward="false" selection-start-line="0" selection-start-column="8" selection-end-line="0" selection-end-column="8" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1056,6 +1083,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="5" column="13" lean-forward="false" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1077,16 +1105,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="114">
           <caret line="48" column="13" lean-forward="false" selection-start-line="48" selection-start-column="13" selection-end-line="48" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="42" column="9" lean-forward="true" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="9" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1215,7 +1233,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/model/graph/building/Building.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
+        <state relative-caret-position="-153">
           <caret line="197" column="5" lean-forward="false" selection-start-line="197" selection-start-column="5" selection-end-line="197" selection-end-column="5" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1225,6 +1243,18 @@
             <element signature="e#6398#6399#0" expanded="true" />
             <element signature="e#17087#17088#0" expanded="true" />
             <element signature="e#17128#17129#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3060">
+          <caret line="212" column="8" lean-forward="false" selection-start-line="212" selection-start-column="8" selection-end-line="212" selection-end-column="8" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#3928#3929#0" expanded="true" />
+            <element signature="e#3964#3965#0" expanded="true" />
           </folding>
         </state>
       </provider>
