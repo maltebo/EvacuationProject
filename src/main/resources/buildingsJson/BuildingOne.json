@@ -2,6 +2,7 @@
   "name": "Building One",
   "gridSizeX": 20,
   "gridSizeY": 8,
+  "floors": 1,
   "rooms": [
     {
       "beginning": {

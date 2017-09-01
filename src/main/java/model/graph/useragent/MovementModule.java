@@ -49,7 +49,7 @@ class MovementModule {
      * this class determines the person's next step.
      *
      * @param person the person that shall be moved
-     * @return a direction, specified by an (TODO) integer
+     * @return a direction, specified by an integer
      */
     int move(Person person) {
 

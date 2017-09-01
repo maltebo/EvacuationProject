@@ -45,6 +45,11 @@ public class Building {
     public final int gridSizeY;
 
     /**
+     * the number of floors in this Building
+     */
+    public final int floors;
+
+    /**
      * the number of rooms in this building, is used for id creation
      */
     private transient int roomNumber = 0;
@@ -127,7 +132,7 @@ public class Building {
      */
 
     public Building() {
-        this("empty", 1, 1, 0);
+        this("empty", 1, 1, 1, 0);
     }
 
 
@@ -141,7 +146,7 @@ public class Building {
      */
     public Building(Building building) {
 
-        this(building.name, building.gridSizeX, building.gridSizeY);
+        this(building.name, building.gridSizeX, building.gridSizeY, building.floors);
         for (Room room : building.rooms) {
             addRoom(grid.getCell(room.beginning), grid.getCell(room.end), room.id);
         }
@@ -179,11 +184,13 @@ public class Building {
      * @param gridSizeX       grid size in x-direction.
      * @param gridSizeY       grid size in y-direction.
      * @param averageCapacity average Capacity of people in this building.
+     * @param numberOfFloors the number of Floors of this building.
      */
-    public Building(String name, int gridSizeX, int gridSizeY, int averageCapacity) {
+    public Building(String name, int gridSizeX, int gridSizeY, int numberOfFloors, int averageCapacity) {
         this.name = name;
         this.gridSizeX = gridSizeX;
         this.gridSizeY = gridSizeY;
+        this.floors = numberOfFloors;
         createGrid();
         this.rooms = new HashSet<>();
         this.doors = new HashSet<>();
@@ -199,12 +206,13 @@ public class Building {
      * constructor that creates a new building and sets the number of people
      * inside to zero.
      *
-     * @param name      Name of the building.
-     * @param gridSizeX grid size in x-direction.
-     * @param gridSizeY grid size in y-direction.
+     * @param name           Name of the building.
+     * @param gridSizeX      grid size in x-direction.
+     * @param gridSizeY      grid size in y-direction.
+     * @param numberOfFloors the number of Floors of this building.
      */
-    public Building(String name, int gridSizeX, int gridSizeY) {
-        this(name, gridSizeX, gridSizeY, 0);
+    public Building(String name, int gridSizeX, int gridSizeY, int numberOfFloors) {
+        this(name, gridSizeX, gridSizeY, numberOfFloors, 0);
     }
 
     /**
@@ -1364,7 +1372,8 @@ public class Building {
             String name = buildingObject.get("name").getAsString();
             int gridSizeX = buildingObject.get("gridSizeX").getAsInt();
             int gridSizeY = buildingObject.get("gridSizeY").getAsInt();
-            Building building = new Building(name, gridSizeX, gridSizeY);
+            int floors = buildingObject.get("floors").getAsInt();
+            Building building = new Building(name, gridSizeX, gridSizeY, floors);
 
             JsonArray roomsObject = buildingObject.getAsJsonArray("rooms");
             for (JsonElement temp : roomsObject) {
@@ -1392,7 +1401,7 @@ public class Building {
         /**
          * creates a new Room from a json-fragment describing a room
          *
-         * @param json the json that represents the room
+         * @param json     the json that represents the room
          * @param building the building this room will be added to
          */
         private void deserializeRoom(JsonObject json, Building building) {
@@ -1405,7 +1414,7 @@ public class Building {
         /**
          * creates a new Door from a json-fragment describing a Door
          *
-         * @param json the json that represents the Door
+         * @param json     the json that represents the Door
          * @param building the building this Door will be added to
          */
         private void deserializeDoor(JsonObject json, Building building) {
@@ -1426,7 +1435,7 @@ public class Building {
         /**
          * creates a new Stair from a json-fragment describing a Stair
          *
-         * @param json the json that represents the Stair
+         * @param json     the json that represents the Stair
          * @param building the building this Stair will be added to
          */
         private void deserializeStair(JsonObject json, Building building) {
