@@ -3,15 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="14b776d4-9200-4e93-bf4f-1724f2afb036" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/controller/Controller.java" afterPath="$PROJECT_DIR$/src/main/java/model/controller/Controller.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/PathOntology.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/PathOntology.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/building/Building.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/building/Building.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/building/Grid.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/useragent/MovementModule.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/useragent/MovementModule.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/graph/useragent/Person.java" afterPath="$PROJECT_DIR$/src/main/java/model/graph/useragent/Person.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/representation/BuildingRepresentation.java" afterPath="$PROJECT_DIR$/src/main/java/model/representation/BuildingRepresentation.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/representation/Menu.java" afterPath="$PROJECT_DIR$/src/main/java/model/representation/Menu.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/model/representation/Window.java" afterPath="$PROJECT_DIR$/src/main/java/model/representation/Window.java" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -785,7 +776,7 @@
       <workItem from="1504094385303" duration="12943000" />
       <workItem from="1504183985504" duration="10294000" />
       <workItem from="1504256921513" duration="12402000" />
-      <workItem from="1504524449157" duration="20612000" />
+      <workItem from="1504524449157" duration="20644000" />
     </task>
     <task id="LOCAL-00001" summary="Changes in EvacuationStrategy to avoid NullPointerExceptions">
       <created>1504258225733</created>
@@ -829,11 +820,18 @@
       <option name="project" value="LOCAL" />
       <updated>1504272448813</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="various floors can now be added">
+      <created>1504553047543</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1504553047543</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="84627000" />
+    <option name="totallyTimeSpent" value="84659000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="95" y="23" width="1546" height="931" extended-state="0" />
