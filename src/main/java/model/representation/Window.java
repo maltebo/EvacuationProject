@@ -8,11 +8,11 @@ import java.awt.*;
  */
 public class Window extends Canvas {
 
-    JFrame frame;
-    JPanel upperSide;
-    Canvas canvas;
-    Menu menu;
-    Component statistics;
+    private JFrame frame;
+    private JPanel upperSide;
+    private Canvas canvas;
+    private Menu menu;
+    private Component statistics;
 
     public Window(int width, int height, BuildingRepresentation building, Menu menu, Component statistics) {
 

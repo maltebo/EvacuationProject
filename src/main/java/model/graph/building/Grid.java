@@ -25,6 +25,8 @@ public class Grid {
      */
     int floors;
 
+    final Building building;
+
     /**
      * all the existing cells in this grid (basically a Singleton, we do not want to create
      * any cell twice
@@ -33,6 +35,7 @@ public class Grid {
 
     Grid(Building building) {
 
+        this.building = building;
         xSize = building.gridSizeX;
         ySize = building.gridSizeY;
         floors = building.floors;
@@ -49,13 +52,13 @@ public class Grid {
 
     Cell getCell(int x, int y) {
 
-        return getCell(x,y,0);
+        return getCell(x, y, 0);
 
     }
 
     Cell getCell(int x, int y, int f) {
         Cell cell = existingCells.get(new Pair<>(new Pair<>(x, y), f));
-        if(cell == null) {
+        if (cell == null) {
             cell = addCell(x, y, f);
         }
         return cell;
@@ -64,7 +67,7 @@ public class Grid {
     public Cell getCell(Cell cell) {
 
         Cell cell1 = existingCells.get(new Pair<>(new Pair<>(cell.x, cell.y), cell.floor));
-        if(cell1 == null) {
+        if (cell1 == null) {
             cell1 = addCell(cell.x, cell.y, cell.floor);
         }
         return cell1;
@@ -156,7 +159,7 @@ public class Grid {
 
         private transient boolean isBlocked = false;
 
-        private Cell (int x, int y, int floor) {
+        private Cell(int x, int y, int floor) {
             this.x = x;
             this.y = y;
             this.floor = floor;
@@ -185,7 +188,112 @@ public class Grid {
             if (dir % DIR.LEFT == 0) newX -= 1;
             if (dir % DIR.RIGHT == 0) newX += 1;
 
-            return getCell(newX, newY);
+            Cell newCell = getCell(newX, newY, floor);
+
+            return newCell;
+        }
+
+        public Cell getNextStairCell(int dir) {
+
+            Cell nextCell = getNextCell(dir);
+            if (isStair && getNextCell(dir).isStair) {
+                return nextCell;
+            } else {
+                Cell tempCell = isStair ? this : nextCell;
+
+                Stair stair = null;
+                for (Stair tempStair : building.getStairs()) {
+                    if (tempStair.getStairCells().contains(tempCell)) {
+
+                        stair = tempStair;
+                        break;
+
+                    }
+                }
+
+                if (stair == null) {
+                    System.err.println("STAIR NOT FOUND");
+                    return null;
+                }
+
+                if (this.isStair) {
+
+                    if (dir == stair.direction) {
+
+                        if (stair.getHigherCells().contains(tempCell)) {
+
+                            int newX = tempCell.x;
+                            int newY = tempCell.y;
+
+                            return getCell(newX, newY, stair.getHigherFloor());
+
+                        }
+
+                    } else if (dir == DIR.getComplement(stair.getDirection())) {
+
+                        if (stair.getLowerCells().contains(tempCell)) {
+
+                            int newX = tempCell.x;
+                            int newY = tempCell.y;
+
+                            return getCell(newX, newY, stair.getLowerFloor());
+
+                        }
+
+                    } else return null;
+
+
+                } else {
+
+                    if (dir == stair.getDirection()) {
+
+                        if (stair.getLowerCells().contains(this)) {
+
+                            int newX = tempCell.x;
+                            int newY = tempCell.y;
+
+                            return getCell(newX, newY, floor);
+
+                        }
+
+                    } else if (dir == DIR.getComplement(stair.getDirection())) {
+
+                        if (stair.getHigherCells().contains(this)) {
+
+                            int newX = tempCell.x;
+                            int newY = tempCell.y;
+
+                            return getCell(newX, newY, floor);
+
+                        }
+
+                    } else return null;
+
+                }
+                return null;
+            }
+
+        }
+
+
+        public Cell getNextCell(int dir, boolean up) {
+
+            int newX = x;
+            int newY = y;
+            int newFloor = floor;
+
+            if (dir % DIR.UP == 0) newY -= 1;
+            if (dir % DIR.DOWN == 0) newY += 1;
+            if (dir % DIR.LEFT == 0) newX -= 1;
+            if (dir % DIR.RIGHT == 0) newX += 1;
+
+            if (up) {
+                newFloor++;
+            } else {
+                newFloor--;
+            }
+
+            return getCell(newX, newY, newFloor);
 
         }
 
@@ -199,7 +307,7 @@ public class Grid {
         void setRoom(Room isInRoom) {
             if (this.isInRoom == null) {
                 this.isInRoom = isInRoom;
-            } else throw new IllegalStateException("Cell is already in a room!");
+            } else throw new IllegalStateException("Cell " + this + " is already in a room!");
         }
 
         public Room getRoom() {
@@ -251,7 +359,7 @@ public class Grid {
 
         @Override
         public String toString() {
-            return "x = " + x + "\ty = " + y;
+            return "x = " + x + "\ty = " + y + "\tfloor = " + floor;
         }
     }
 
@@ -311,7 +419,7 @@ public class Grid {
 
         @Override
         public String toString() {
-            return "CellPair:{Cell1:{"+cell1+"}Cell2:{"+cell2+"}}";
+            return "CellPair:{Cell1:{" + cell1 + "}Cell2:{" + cell2 + "}}";
         }
     }
 

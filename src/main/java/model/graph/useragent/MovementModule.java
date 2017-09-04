@@ -1,8 +1,8 @@
 package model.graph.useragent;
 
 import model.graph.building.Building;
+import model.graph.building.Building.*;
 import model.graph.building.DIR;
-import model.graph.building.Grid;
 import model.graph.building.Grid.*;
 import model.graph.Path;
 import model.graph.PathOntology;
@@ -33,7 +33,7 @@ class MovementModule {
         po = PathOntology.getInstance(building);
     }
 
-    public static MovementModule getMovementModule (Building building) {
+    public static MovementModule getMovementModule(Building building) {
 
         for (MovementModule mm : existingInstances) {
             if (mm.building == building) {
@@ -53,7 +53,7 @@ class MovementModule {
      */
     int move(Person person) {
 
-        Grid.Cell cell = person.getIsOnCell();
+        Cell cell = person.getIsOnCell();
 
         // if the person is outside the building and does not want to get in, it gets removed
         // from the list of persons
@@ -62,13 +62,18 @@ class MovementModule {
             return DIR.STAY;
         }
 
+        // if the person should stand still, just always return DIR.STAY
+        else if (person.getState() == Person.STATE.STANDSTILL) {
+            return DIR.STAY;
+        }
+
         // if the person should get into the building, the directions into the building
         // are searched and a valid one is found and returned if possible
-        if (person.getState() == Person.STATE.GETINTOBUILDING) {
+        else if (person.getState() == Person.STATE.GETINTOBUILDING) {
 
             LinkedList<Integer> dir = getDirectionsIntoBuilding(cell);
             for (int direction : dir) {
-                Grid.Cell newCell = cell.getNextCell(direction);
+                Cell newCell = cell.getNextCell(direction);
                 if (isValid(cell, newCell, person.isDisabled()) && !newCell.isOutside()) {
                     person.setState(Person.STATE.STAYINBUILDING);
                     return direction;
@@ -82,7 +87,7 @@ class MovementModule {
         else if (person.getState() == Person.STATE.STAYINROOM) {
 
             int dir = DIR.getRandomDirection();
-            Grid.Cell newCell = cell.getNextCell(dir);
+            Cell newCell = cell.getNextCell(dir);
             if (isValid(cell, newCell, person.isDisabled()) &&
                     cell.getRoom().equals(newCell.getRoom())) {
                 return dir;
@@ -94,7 +99,7 @@ class MovementModule {
         else if (person.getState() == Person.STATE.STAYINBUILDING) {
 
             int dir = DIR.getRandomDirection();
-            Grid.Cell newCell = cell.getNextCell(dir);
+            Cell newCell = cell.getNextCell(dir);
             if (isValid(cell, newCell, person.isDisabled()) && !newCell.isOutside()) {
                 return dir;
             } else return DIR.STAY;
@@ -104,7 +109,7 @@ class MovementModule {
         else if (person.getState() == Person.STATE.WANDERRANDOMLY) {
 
             int dir = DIR.getRandomDirection();
-            Grid.Cell newCell = cell.getNextCell(dir);
+            Cell newCell = cell.getNextCell(dir);
             if (isValid(cell, newCell, person.isDisabled())) {
                 return dir;
             }
@@ -141,15 +146,22 @@ class MovementModule {
             }
 
             // and sets the person's path to the shortest path it can find
-            if (person.getPath() == null ||
-                    person.getPath().getWay().get(0).getRoomChangingCells(person.getIsInRoom()) == null) {
+            if (person.getPath() == null || (!person.getPath().getWay().isEmpty() &&
+                    person.getPath().getWay().get(0).getRoomChangingCells(person.getIsInRoom()) == null)) {
+
                 person.setPath(new Path(po.getShortestPath(cell, person.getGoalRoom(), person.isDisabled())));
+            }
+
+            if (person.getPath().getWay().isEmpty()) {
+                person.setState(Person.STATE.STAYINBUILDING);
+                return DIR.STAY;
             }
 
 
             // goalPassage is the first existing passage in the person's path,
             // which should be reachable!
             Passage goalPassage = person.getPath().getWay().get(0);
+
 
             // if the goalPassage's cells are already reached
             if (goalPassage.getRoomChangingCells().contains(cell)) {
@@ -159,7 +171,7 @@ class MovementModule {
                 // for each of these directions
                 for (int direction : dir) {
                     // newCell is the cell the person WOULD reach when taking this direction
-                    Grid.Cell newCell = cell.getNextCell(direction);
+                    Cell newCell = cell.getNextCell(direction);
                     // if the person is not disabled / it's no stair
                     if (isValid(cell, newCell, person.isDisabled())) {
                         // the first passage in the path gets deleted because the person has
@@ -196,7 +208,7 @@ class MovementModule {
                 dir2.removeAll(dir);
                 for (int direction : dir2) {
                     // we calculate cell that would be reached
-                    Grid.Cell newCell = cell.getNextCell(direction);
+                    Cell newCell = cell.getNextCell(direction);
                     // see above
                     if (isValid(cell, newCell, person.isDisabled()) && !newCell.isOutside()) {
                         return direction;
@@ -210,7 +222,7 @@ class MovementModule {
                 // for each of the possible directions
                 for (int direction : dir) {
                     // we calculate cell that would be reached
-                    Grid.Cell newCell = cell.getNextCell(direction);
+                    Cell newCell = cell.getNextCell(direction);
                     // see above
                     if (isValid(cell, newCell, person.isDisabled()) && !newCell.isOutside()) {
                         return direction;
@@ -218,8 +230,7 @@ class MovementModule {
                 }
 
             }
-        }
-        else if (person.getState() == Person.STATE.EVACUATION) {
+        } else if (person.getState() == Person.STATE.EVACUATION) {
 
             if (evacuationStrategy == null) {
                 evacuationStrategy = building.getEvacuationStrategy();
@@ -232,8 +243,6 @@ class MovementModule {
             if (person.getPath() == null) {
                 person.setPath(evacuationStrategy.getPath(person));
             }
-
-
 
 
             // nextPassage is the first existing passage in the person's path,
@@ -289,7 +298,6 @@ class MovementModule {
             }
 
 
-
         } else throw new
 
                 IllegalArgumentException("No correct state or no goal!");
@@ -303,7 +311,7 @@ class MovementModule {
      * one side of the passage
      *
      * @param goalPassage the passage that should be crossed in the next step
-     * @param person the person for which we would like to get the correct directions
+     * @param person      the person for which we would like to get the correct directions
      * @return a List with the directions that lead to the next room
      * @throws IllegalArgumentException if the person is not on the right cells of this passage
      */
@@ -311,19 +319,39 @@ class MovementModule {
 
         // in the end, cells contains all cells that are in the other room as the one the person
         // is in
-        HashSet<Grid.Cell> cells = new HashSet<>(goalPassage.getRoomChangingCells());
-        HashSet<Grid.Cell> personCells = new HashSet<>(goalPassage.getRoomChangingCells(person.getIsInRoom()));
+        HashSet<Cell> cells = new HashSet<>(goalPassage.getRoomChangingCells());
+        HashSet<Cell> personCells = new HashSet<>(goalPassage.getRoomChangingCells(person.getIsInRoom()));
         cells.removeAll(personCells);
 
         // in the end, dir contains all directions that lead, when followed, to the next room
         LinkedList<Integer> dir = new LinkedList<>();
 
-        for (int direction : DIR.getDirections()) {
-            if (cells.contains(person.getIsOnCell().getNextCell(direction))) {
-                dir.add(direction);
+        if (!goalPassage.isStair()) {
+
+            for (int direction : DIR.getDirections()) {
+                if (cells.contains(person.getIsOnCell().getNextCell(direction))) {
+                    dir.add(direction);
+                }
             }
+            if (dir.isEmpty()) throw new IllegalArgumentException("You seem not to be on right Cells!");
+        } else {
+
+            for (int direction : DIR.getDirections()) {
+
+                System.out.println(person.getIsOnCell());
+                System.out.println(person.getIsOnCell().getNextStairCell(direction));
+                System.out.println(direction);
+
+                if (cells.contains(person.getIsOnCell().getNextStairCell(direction))) {
+                    dir.add(direction);
+                }
+
+
+            }
+
+            if (dir.isEmpty()) throw new IllegalArgumentException("You seem not to be on right Cells!");
+
         }
-        if (dir.isEmpty()) throw new IllegalArgumentException("You seem not to be on right Cells!");
 
         return dir;
 
@@ -334,7 +362,7 @@ class MovementModule {
      * up front than the ones that do not lead in the right direction
      *
      * @param goalPassage the passage the person should reach
-     * @param person the person that has a field its on and a goal it wants to reach
+     * @param person      the person that has a field its on and a goal it wants to reach
      * @return a list of directions, ordered descending according to their quality
      */
     private LinkedList<Integer> getDirections(Passage goalPassage, Person person) {
@@ -410,9 +438,10 @@ class MovementModule {
      * @param cell the cell the person is standing on
      * @return a list of all possible directions inside the building
      */
-    private LinkedList<Integer> getDirectionsIntoBuilding(Grid.Cell cell) {
+    private LinkedList<Integer> getDirectionsIntoBuilding(Cell cell) {
 
         LinkedList<Integer> directions = new LinkedList<>();
+
 
         for (int dir : DIR.getDirections()) {
 
@@ -430,12 +459,12 @@ class MovementModule {
     /**
      * checks if a move from cell oldCell to cell newCell is generally possible
      *
-     * @param oldCell the cell from which the movement starts
-     * @param newCell the cell in which the movement ends
+     * @param oldCell    the cell from which the movement starts
+     * @param newCell    the cell in which the movement ends
      * @param isDisabled whether the person that wants to make the step is disabled
      * @return whether this step is applicable and generally valid
      */
-    private boolean isValid(Grid.Cell oldCell, Grid.Cell newCell, boolean isDisabled) {
+    private boolean isValid(Cell oldCell, Cell newCell, boolean isDisabled) {
 
         // cell must not be a stair and the person at the same time disabled
         if (!isDisabled || !newCell.isStair()) {
@@ -444,6 +473,7 @@ class MovementModule {
                 // not both of the cells can be blocked at the same time. That is so for avoiding
                 // two people to go both diagonally in different directions so that they cross.
                 if (!oldCell.isBlocked() || !newCell.isBlocked()) {
+
                     return true;
                 }
             }
@@ -456,25 +486,25 @@ class MovementModule {
      * gets the average difference between the cell a person stands on and a (field) of cells
      * that the person wants to reach next, either in x- or in y-Direction.
      *
-     * @param person the person that wants to move
+     * @param person            the person that wants to move
      * @param roomChangingCells the cells the person must reach in order to be able
      *                          to cross the <code>Passage</code>
      * @param XOrY              true = xDifference, false = yDifference
      * @return the difference as a float
      */
 
-    private float getAverageDiff(Person person, HashSet<Grid.Cell> roomChangingCells, boolean XOrY) {
+    private float getAverageDiff(Person person, HashSet<Cell> roomChangingCells, boolean XOrY) {
 
         float diff = 0;
 
         if (roomChangingCells != null) {
             if (XOrY) {
-                for (Grid.Cell cell : roomChangingCells) {
+                for (Cell cell : roomChangingCells) {
                     diff += (cell.getX() - person.getIsOnCell().getX());
                 }
 
             } else {
-                for (Grid.Cell cell : roomChangingCells) {
+                for (Cell cell : roomChangingCells) {
                     diff += (cell.getY() - person.getIsOnCell().getY());
                 }
             }
@@ -496,7 +526,7 @@ class MovementModule {
      * @return if between cell1 and cell2, there is a wall, it returns true,
      * else it returns false
      */
-    private boolean isWall(Grid.Cell cell1, Grid.Cell cell2) {
+    private boolean isWall(Cell cell1, Cell cell2) {
 
         // if both cells are outside, there is no wall between the two
         if (cell1.isOutside() && cell2.isOutside()) return false;
@@ -507,7 +537,7 @@ class MovementModule {
             Room room = cell1.isOutside() ? cell2.getRoom() : cell1.getRoom();
             HashSet<Passage> exits = room.getExits();
             for (Passage exit : exits) {
-                HashSet<Grid.Cell> changeCells = exit.getRoomChangingCells();
+                HashSet<Cell> changeCells = exit.getRoomChangingCells();
                 if (changeCells.contains(cell1) && changeCells.contains(cell2)) {
                     return false;
                 }
@@ -528,7 +558,7 @@ class MovementModule {
             for (Passage p1 : passages1) {
                 for (Passage p2 : passages2) {
                     if (p1.equals(p2)) {
-                        HashSet<Grid.Cell> changeCells = p1.getRoomChangingCells();
+                        HashSet<Cell> changeCells = p1.getRoomChangingCells();
                         if (changeCells.contains(cell1) && changeCells.contains(cell2)) {
                             return false;
                         }

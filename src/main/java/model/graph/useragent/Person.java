@@ -25,11 +25,11 @@ public class Person {
     /**
      * the color of this person, might be changed if the person changes its state (TODO)
      */
-    public Color COLOR;
+    public transient Color COLOR;
     /**
      * the size of the person (used to represent it)
      */
-    public final int SIZE;
+    public transient final int SIZE;
     /**
      * the person's name
      */
@@ -37,11 +37,11 @@ public class Person {
     /**
      * the building this person is currently in
      */
-    private Building building;
+    private transient Building building;
     /**
      * the room this person is in
      */
-    private Room isInRoom;
+    private transient Room isInRoom;
     /**
      * defines whether the person is disabled or not - standard
      * is no
@@ -50,7 +50,7 @@ public class Person {
     /**
      * the last cell this person was on
      */
-    private Cell wasOnCell;
+    private transient Cell wasOnCell;
     /**
      * the cell the person is on in this step
      */
@@ -58,7 +58,7 @@ public class Person {
     /**
      * used to give each person a unique id
      */
-    private static int idResource = 0;
+    private transient static int idResource = 0;
     /**
      * the person's unique id
      */
@@ -66,25 +66,26 @@ public class Person {
     /**
      * the state the person is in
      */
-    private STATE state;
+    private transient STATE state;
     /**
      * the path the person wants to go (this is null in the beginning)
      */
-    private Path path;
+    private transient Path path;
     /**
      * the person's goal room, in the beginning null
      */
-    private Room goalRoom;
+    private transient Room goalRoom;
     /**
      * a boolean that states whether this person is being evacuated right now
      */
 
-    private MovementModule movementModule;
+    private transient MovementModule movementModule;
     /**
      * all states a person can be in
      */
     public enum STATE {
         GETINTOBUILDING,
+        STANDSTILL,
         STAYINROOM,
         STAYINBUILDING,
         WANDERRANDOMLY,
@@ -147,7 +148,7 @@ public class Person {
      * @param isDisabled see other constructor
      * @param state      see other constructor
      */
-    public Person(String name, Grid.Cell startCell, boolean isDisabled, STATE state, Building building) {
+    public Person(String name, Cell startCell, boolean isDisabled, STATE state, Building building) {
 
         this(name, startCell, isDisabled, state, null, building);
 
@@ -318,7 +319,7 @@ public class Person {
             // sets its Room
             isInRoom = isOnCell.getRoom();
             if (building.getState() != Building.STATE.EVACUATION) {
-                if (this.state != STATE.GOTOROOM || this.goalRoom != null) {
+                if ((this.state != STATE.GOTOROOM || this.goalRoom != null) && this.state != STATE.STANDSTILL) {
                     if (Math.random() < 0.1) {
 
                         changeState();

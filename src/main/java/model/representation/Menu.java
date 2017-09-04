@@ -36,6 +36,8 @@ public class Menu extends JPanel {
 
     private JButton fileOpenButton;
 
+    private JButton serializeButton;
+
     public Menu(Controller controller) {
 
         this.controller = controller;
@@ -50,6 +52,9 @@ public class Menu extends JPanel {
 
         stopButton = stopButton();
         stopButton.setPreferredSize(new Dimension(100, 100));
+
+        serializeButton = serializeButton();
+        serializeButton.setPreferredSize(new Dimension(100,100));
 
         fileOpenButton = fileOpen();
         fileOpenButton.setPreferredSize(new Dimension(100, 100));
@@ -78,6 +83,7 @@ public class Menu extends JPanel {
         add(mpsSliderPanel);
         add(peopleSliderPanel);
         add(fileOpenButton);
+        add(serializeButton);
 
     }
 
@@ -108,6 +114,29 @@ public class Menu extends JPanel {
         });
 
         return fileOpenButton;
+
+    }
+
+    private JButton serializeButton() {
+
+        serializeButton = new JButton("Save Building / State");
+
+        serializeButton.setEnabled(false);
+
+        serializeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int returnVal = fileChooser.showSaveDialog(serializeButton);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    controller.saveFile(file);
+
+                }
+            }
+        });
+
+        return serializeButton;
 
     }
 
@@ -280,6 +309,8 @@ public class Menu extends JPanel {
                 emergencyButton.setEnabled(false);
 
                 fileOpenButton.setEnabled(false);
+
+                serializeButton.setEnabled(true);
                 break;
 
             case EMPTY:
@@ -296,6 +327,8 @@ public class Menu extends JPanel {
                 emergencyButton.setEnabled(false);
 
                 fileOpenButton.setEnabled(true);
+
+                serializeButton.setEnabled(false);
                 break;
 
             case BUILDINGMOVING:
@@ -314,6 +347,8 @@ public class Menu extends JPanel {
                 }
 
                 fileOpenButton.setEnabled(false);
+
+                serializeButton.setEnabled(false);
                 break;
 
             default:

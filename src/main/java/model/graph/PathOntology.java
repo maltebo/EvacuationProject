@@ -1,6 +1,7 @@
 package model.graph;
 
 import model.graph.building.Grid;
+import model.graph.building.Grid.*;
 import model.graph.building.Building;
 import model.graph.building.Building.*;
 
@@ -51,6 +52,7 @@ public class PathOntology {
         this.grid = building.getGrid();
         initializePaths();
         initializeDisabledPaths();
+
     }
 
     /**
@@ -74,14 +76,7 @@ public class PathOntology {
     private void initializePaths() {
         // all passages in the building
         LinkedList<Passage> allPassages = new LinkedList<>(building.getPassages());
-        /*
-        allPassages.sort(new Comparator<Passage>() {
-            @Override
-            public int compare(Passage o1, Passage o2) {
-                return (int) (o1.id - o2.id);
-            }
-        });
-        */
+
         // a matrix which will contain the shortest paths between any pair of
         // passages
         shortestPaths = new Path[allPassages.size()][allPassages.size()];
@@ -89,10 +84,10 @@ public class PathOntology {
         // initialization, every passage-pair is initialized with 0 (if it is two times the same
         // passage), infinity (if they are not directly connected through one room) or the value of the
         // distance between them.
-        for (Building.Passage p1 : allPassages) {
-            for (Building.Passage p2 : allPassages) {
+        for (Passage p1 : allPassages) {
+            for (Passage p2 : allPassages) {
 
-                LinkedList<Building.Passage> temp = new LinkedList<>();
+                LinkedList<Passage> temp = new LinkedList<>();
                 temp.add(p1);
                 if (!p1.equals(p2)) {
                     temp.add(p2);
@@ -101,17 +96,17 @@ public class PathOntology {
 
             }
         }
-
+//TODO
         // Dijkstra-algorithm for calculating the shortest paths
-        for (Building.Passage p0 : allPassages) {
-            for (Building.Passage p1 : allPassages) {
-                for (Building.Passage p2 : allPassages) {
+        for (Passage p0 : allPassages) {
+            for (Passage p1 : allPassages) {
+                for (Passage p2 : allPassages) {
 
                     if ((long) shortestPaths[p1.id][p0.id].getCosts() +
                             (long) shortestPaths[p0.id][p2.id].getCosts() + 1
                             < (long) shortestPaths[p1.id][p2.id].getCosts()) {
 
-                        LinkedList<Building.Passage> tempPath = new LinkedList<>();
+                        LinkedList<Passage> tempPath = new LinkedList<>();
                         tempPath.addAll(shortestPaths[p1.id][p0.id].getWay());
                         tempPath.removeLast();
                         tempPath.addAll(shortestPaths[p0.id][p2.id].getWay());
@@ -145,7 +140,7 @@ public class PathOntology {
         for (int i = 0; i < allDoors.size(); i++) {
             for (int j = 0; j < allDoors.size(); j++) {
 
-                LinkedList<Building.Passage> temp = new LinkedList<>();
+                LinkedList<Passage> temp = new LinkedList<>();
                 temp.add(allDoors.get(i));
                 if (!allDoors.get(i).equals(allDoors.get(j))) {
                     temp.add(allDoors.get(j));
@@ -165,7 +160,7 @@ public class PathOntology {
                             (allDoors.get(0).getRoomChangingCells().size() / 2)
                             < (long) shortestPathsDisabled[j][k].getCosts()) {
 
-                        LinkedList<Building.Passage> tempPath = new LinkedList<>();
+                        LinkedList<Passage> tempPath = new LinkedList<>();
                         tempPath.addAll(shortestPathsDisabled[j][i].getWay());
                         tempPath.removeLast();
                         tempPath.addAll(shortestPathsDisabled[i][k].getWay());
@@ -190,18 +185,18 @@ public class PathOntology {
      * @return 0, if both passages are identical; (integer)-infinity, if they are not connected via a room;
      * the longer distance in x / y - direction if there is a direct connecting room
      */
-    private float directDistanceBetween(Building.Passage p1, Building.Passage p2) {
+    private float directDistanceBetween(Passage p1, Passage p2) {
 
         if (p1.equals(p2)) {
             return 0;
         }
-        Building.Room connection = p1.getConnected(p2);
+        Room connection = p1.getConnected(p2);
         float distance = 0;
         if (connection != null) {
 
-            HashSet<Grid.Cell> p1Cells = p1.getRoomChangingCells(connection);
-            HashSet<Grid.Cell> p2Cells = p2.getRoomChangingCells(connection);
-            for (Grid.Cell c1 : p1Cells) {
+            HashSet<Cell> p1Cells = p1.getRoomChangingCells(connection);
+            HashSet<Cell> p2Cells = p2.getRoomChangingCells(connection);
+            for (Cell c1 : p1Cells) {
                 distance += building.distance(c1, p2Cells);
             }
             return distance / p1Cells.size();
@@ -218,38 +213,40 @@ public class PathOntology {
      * @param disabled a boolean; whether the person is disabled or not
      * @return the shortest path for this person
      */
-    public Path getShortestPath(Grid.Cell start, Building.Room end, boolean disabled) {
+    public Path getShortestPath(Cell start, Room end, boolean disabled) {
 
         // from the starting Cell, it gets a copy of all reachable passages
-        HashSet<Building.Passage> startPass = start.getRoom().getPassages();
+        HashSet<Passage> startPass = start.getRoom().getPassages();
+
         if (end == null) {
             startPass.addAll(start.getRoom().getExits());
         }
         // from the Room we want to go to, it gets all outgoing Passages
-        HashSet<Building.Passage> endPass;
+        HashSet<Passage> endPass;
         if (end != null) {
             endPass = end.getPassages();
         } else {
             endPass = building.getExits();
         }
         if (disabled) {
-            HashSet<Building.Passage> copy = new HashSet<>(endPass);
-            for (Building.Passage p : copy) {
+            HashSet<Passage> copy = new HashSet<>(endPass);
+            for (Passage p : copy) {
                 if (p.isStair()) endPass.remove(p);
             }
             copy = new HashSet<>(startPass);
-            for (Building.Passage p : copy) {
+            for (Passage p : copy) {
                 if (p.isStair()) startPass.remove(p);
             }
+
 
         }
 
         // it creates a new dummy path
-        Path temp = new Path(null, Integer.MAX_VALUE);
+        Path temp = new Path(new LinkedList<>(), Integer.MAX_VALUE);
 
         // it goes through all passage - passage - combinations
-        for (Building.Passage p1 : startPass) {
-            for (Building.Passage p2 : endPass) {
+        for (Passage p1 : startPass) {
+            for (Passage p2 : endPass) {
 
                 // costs are distance of the cell to the cells of the passage + 1
                 // + the costs of the shortest path between the passages
@@ -294,17 +291,17 @@ public class PathOntology {
      * @param p2 second passage
      * @return the shortest path without stairs
      */
-    private Path getDisabledShortestPath(Building.Passage p1, Building.Passage p2) {
+    private Path getDisabledShortestPath(Passage p1, Passage p2) {
 
-        LinkedList<Building.Passage> allPassagesWithoutStairs = new LinkedList<>(building.getPassages());
-        LinkedList<Building.Passage> copy = new LinkedList<>(allPassagesWithoutStairs);
-        for (Building.Passage passage : copy) {
+        LinkedList<Passage> allPassagesWithoutStairs = new LinkedList<>(building.getPassages());
+        LinkedList<Passage> copy = new LinkedList<>(allPassagesWithoutStairs);
+        for (Passage passage : copy) {
             if (passage.isStair()) allPassagesWithoutStairs.remove(passage);
         }
 
-        allPassagesWithoutStairs.sort(new Comparator<Building.Passage>() {
+        allPassagesWithoutStairs.sort(new Comparator<Passage>() {
             @Override
-            public int compare(Building.Passage o1, Building.Passage o2) {
+            public int compare(Passage o1, Passage o2) {
                 return (o1.id - o2.id);
             }
         });
@@ -320,7 +317,7 @@ public class PathOntology {
 
         StringBuilder str = new StringBuilder();
         str.append("PathOntology{" + "shortestPaths=\n");
-        for (Path[] shortestPathPassage : shortestPaths) {
+        for (Path[] shortestPathPassage : shortestPathsDisabled) {
             for (Path shortestPath : shortestPathPassage) {
                 str.append(shortestPath);
                 str.append("\n");

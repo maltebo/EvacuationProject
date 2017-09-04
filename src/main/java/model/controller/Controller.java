@@ -18,7 +18,7 @@ import java.util.Random;
 public class Controller implements Runnable {
 
     private Building building = new Building();
-    private BuildingRepresentation buildingRepresentation = new BuildingRepresentation(building);
+    private BuildingRepresentation buildingRepresentation = new BuildingRepresentation(building, 0);
 
     private Window window;
     private Menu menu;
@@ -161,16 +161,26 @@ public class Controller implements Runnable {
         emergency = false;
         building = Building.fromJSON(file);
         building.setAverageCapacity(numberOfPeople);
-        buildingRepresentation = new BuildingRepresentation(building);
+        buildingRepresentation = new BuildingRepresentation(building, 0);
         window.changeBuilding(buildingRepresentation);
         state = STATE.PAUSE;
         menu.stateChanged(STATE.PAUSE);
 
     }
 
+    public synchronized void saveFile(File file) {
+
+        if (building.getPersonsInBuilding().isEmpty()) {
+            building.makeJSONfile(false, file);
+        } else {
+            building.makeJSONfile(true, file);
+        }
+
+    }
+
     public synchronized void stopBuilding() {
         building = new Building();
-        buildingRepresentation = new BuildingRepresentation(building);
+        buildingRepresentation = new BuildingRepresentation(building, 0);
         state = STATE.EMPTY;
         menu.stateChanged(STATE.EMPTY);
     }
@@ -178,7 +188,7 @@ public class Controller implements Runnable {
 
     public Building createBuildingOne() {
 
-        building = new Building("Building One", 20, 8, 12);
+        building = new Building("Building One", 20, 8, 1);
         createRoomsBuildingOne();
         createPassagesBuildingOne();
         createExitsBuildingOne();
@@ -299,7 +309,7 @@ public class Controller implements Runnable {
         Controller controller = new Controller();
 
         controller.building = new Building();
-        controller.buildingRepresentation = new BuildingRepresentation(controller.building);
+        controller.buildingRepresentation = new BuildingRepresentation(controller.building, 0);
 
         controller.menu = new Menu(controller);
 
@@ -310,6 +320,7 @@ public class Controller implements Runnable {
                 new JPanel());
 
         controller.start();
+
 
     }
 

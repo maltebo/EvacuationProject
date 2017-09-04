@@ -54,14 +54,20 @@ public class BuildingRepresentation extends Canvas {
     private Building building;
 
     /**
+     * the floor that is drawn by this representation
+     */
+    private int floor;
+
+    /**
      * the constructor of this building. specifies this representation
      *
      * @param building the building that is being represented
      * @see Building
      */
-    public BuildingRepresentation(Building building) {
+    public BuildingRepresentation(Building building, int floor) {
 
         this.building = building;
+        this.floor = floor;
         this.gridSizeX = building.gridSizeX;
         this.gridSizeY = building.gridSizeY;
         width = getSize().width;
@@ -69,11 +75,6 @@ public class BuildingRepresentation extends Canvas {
 
         if (width == 0) width = 600;
         if (height == 0) height = 400;
-
-
-        if (building.getPersonsInBuilding().size() > gridSizeX * gridSizeY) {
-            throw new IllegalArgumentException("Too many people!");
-        }
 
         buildingForm = new Path2D.Float();
         update();
@@ -150,13 +151,15 @@ public class BuildingRepresentation extends Canvas {
 
         for (Person person : building.getPersonsInBuilding()) {
 
-            g.setColor(person.COLOR);
-            CoordCell oldCoordinates = adjustCoordinates(getCoordinatesCenter(person.getWasOnCell()), person.SIZE);
-            CoordCell newcoordinates = adjustCoordinates(getCoordinatesCenter(person.getIsOnCell()), person.SIZE);
-            int dX = (int) ((float) (newcoordinates.getX() - oldCoordinates.getX()) * percentage);
-            int dY = (int) ((float) (newcoordinates.getY() - oldCoordinates.getY()) * percentage);
-            CoordCell coordinates = new CoordCell(oldCoordinates.getX() + dX, oldCoordinates.getY() + dY);
-            g.fillOval(coordinates.getX(), coordinates.getY(), person.SIZE, person.SIZE);
+            if (person.getIsOnCell().getFloor() == floor) {
+                g.setColor(person.COLOR);
+                CoordCell oldCoordinates = adjustCoordinates(getCoordinatesCenter(person.getWasOnCell()), person.SIZE);
+                CoordCell newcoordinates = adjustCoordinates(getCoordinatesCenter(person.getIsOnCell()), person.SIZE);
+                int dX = (int) ((float) (newcoordinates.getX() - oldCoordinates.getX()) * percentage);
+                int dY = (int) ((float) (newcoordinates.getY() - oldCoordinates.getY()) * percentage);
+                CoordCell coordinates = new CoordCell(oldCoordinates.getX() + dX, oldCoordinates.getY() + dY);
+                g.fillOval(coordinates.getX(), coordinates.getY(), person.SIZE, person.SIZE);
+            }
 
         }
 
@@ -173,13 +176,15 @@ public class BuildingRepresentation extends Canvas {
         this.gridHeight = (this.getSize().height - (2 * offsetTop)) / gridSizeY;
         buildingForm = new Path2D.Float();
         for (Room room : building.getRooms()) {
-            Path2D roomPath = updateRoom(room);
-            buildingForm.append(roomPath, false);
+            if (room.getFloor() == floor) {
+                Path2D roomPath = updateRoom(room);
+                buildingForm.append(roomPath, false);
+            }
         }
 
-        for (Passage passage : building.getPassages()) {
-            if (passage.isStair()) {
-                Path2D stairPath = updateStair((Stair) passage);
+        for (Stair stair : building.getStairs()) {
+            if (stair.isInFloor(floor)) {
+                Path2D stairPath = updateStair(stair);
                 buildingForm.append(stairPath, false);
             }
         }
@@ -197,7 +202,7 @@ public class BuildingRepresentation extends Canvas {
 
             dX = (int) (gridWidth / 8.0);
             dY = (int) (gridHeight / StairParts);
-            for (Grid.Cell cell : stair.getStairCellsPair().getValue()) {
+            for (Grid.Cell cell : stair.getStairCellsPair1().getValue()) {
                 CoordCellPair ccp = getCoordinates(cell);
                 int x1 = ccp.getCell1().getX() + dX;
                 int x2 = ccp.getCell2().getX() - dX;
@@ -213,7 +218,7 @@ public class BuildingRepresentation extends Canvas {
 
             dX = (int) (gridWidth / StairParts);
             dY = (int) (gridHeight / 8.0);
-            for (Grid.Cell cell : stair.getStairCellsPair().getValue()) {
+            for (Grid.Cell cell : stair.getStairCellsPair1().getValue()) {
                 CoordCellPair ccp = getCoordinates(cell);
                 int x = ccp.getCell1().getX();
                 int y1 = ccp.getCell1().getY() + dY;

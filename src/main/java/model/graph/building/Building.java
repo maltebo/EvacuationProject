@@ -70,6 +70,7 @@ public class Building {
      */
     public enum STATE {
         NORMAL,
+        STANDSTILL,
         EVACUATION
     }
 
@@ -82,8 +83,9 @@ public class Building {
      * a <code>HashSet</code> of all persons that are currently in the building.
      *
      * @see Person
+     * @see Building#toJSONstringWithoutPeople()
      */
-    private transient HashSet<Person> personsInBuilding;
+    private HashSet<Person> personsInBuilding;
 
     /**
      * the actual state of the building.
@@ -165,7 +167,7 @@ public class Building {
                 tempCells.add(grid.getCell(cell));
             }
 
-            addStair(tempCells, stair.direction, stair.id);
+            addStair(tempCells, stair.changeFloor, stair.direction, stair.id);
         }
 
         updateNumbers();
@@ -226,7 +228,7 @@ public class Building {
     }
 
     /**
-     * this Method updates the number of rooms. Will be called after a building
+     * this Method updates the number of rooms and passages. Will be called after a building
      * got created from a JSON-file, because the ids are already assigned.
      * Usually, the parameters will be set automatically by the constructor of a new
      * <code>Passage</code> and a new <code>Room</code>
@@ -281,7 +283,7 @@ public class Building {
     }
 
     public CellPair getCellPair(int x1, int y1, int x2, int y2) {
-        return getCellPair(x1,y1,0,x2,y2,0);
+        return getCellPair(x1, y1, 0, x2, y2, 0);
     }
 
     /**
@@ -391,9 +393,49 @@ public class Building {
     /**
      * creates a new JSON-File from this Building
      */
-    public void makeJSONfile() {
-        String json = toJSONstring();
+    public void makeJSONfile(boolean people, File file) {
+        String json;
+        if (people) {
+            json = toJSONstringWithPeople();
+        } else {
+            json = toJSONstringWithoutPeople();
+        }
+
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+                file.setWritable(true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.err.println("File already exists");
+        }
+        try {
+            FileWriter fw = new FileWriter(file);
+            fw.write(json);
+            fw.flush();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * creates a new JSON-File from this Building
+     */
+    public void makeJSONfile(boolean people) {
+        String json;
+        if (people) {
+            json = toJSONstringWithPeople();
+        } else {
+            json = toJSONstringWithoutPeople();
+        }
         String name = this.name.replaceAll("\\s+", "");
+        if (people) {
+            name += "WithPeople";
+        }
 
         ClassLoader cl = getClass().getClassLoader();
         String resourcePath = cl.getResource("buildingsJson").getPath();
@@ -423,11 +465,37 @@ public class Building {
     /**
      * @return the String that specifies this Building as a JSON
      */
-    private String toJSONstring() {
+    private String toJSONstringWithPeople() {
 
         String json = null;
         try {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            json = gson.toJson(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return json;
+
+    }
+
+    private String toJSONstringWithoutPeople() {
+
+        String json = null;
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder().setPrettyPrinting();
+            gsonBuilder.setExclusionStrategies(new ExclusionStrategy() {
+                @Override
+                public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                    return fieldAttributes.getName().equals("personsInBuilding");
+                }
+
+                @Override
+                public boolean shouldSkipClass(Class<?> aClass) {
+                    return false;
+                }
+            });
+            Gson gson = gsonBuilder.create();
             json = gson.toJson(this);
         } catch (Exception e) {
             e.printStackTrace();
@@ -472,9 +540,25 @@ public class Building {
      * @param stairCells the cells that are occupied by this stair
      * @param direction  the direction in which you can use the stair
      */
+    @Deprecated
     public void addStair(LinkedList<Cell> stairCells, int direction) {
 
-        Stair stair = new Stair(stairCells, direction);
+        addStair(stairCells, false, direction);
+
+    }
+
+    /**
+     * adds a stair to this building. a Stair is specified by the cells belonging
+     * to the stair and the direction of the stair.
+     *
+     * @param stairCells  the cells that are occupied by this stair
+     * @param changeFloor if the stair stays in the same floor or if it is used to change
+     *                    the floor
+     * @param direction   the direction in which you can use the stair
+     */
+    public void addStair(LinkedList<Cell> stairCells, boolean changeFloor, int direction) {
+
+        Stair stair = new Stair(stairCells, changeFloor, direction);
         stairs.add(stair);
 
         addExit(stair);
@@ -490,9 +574,9 @@ public class Building {
      * @param direction  the direction in which you can use the stair
      * @param id         the id of this Stair
      */
-    private void addStair(LinkedList<Cell> stairCells, int direction, int id) {
+    private void addStair(LinkedList<Cell> stairCells, boolean changeFloor, int direction, int id) {
 
-        Stair stair = new Stair(stairCells, direction, id);
+        Stair stair = new Stair(stairCells, changeFloor, direction, id);
         stairs.add(stair);
 
         addExit(stair);
@@ -651,7 +735,8 @@ public class Building {
         while (true) {
             if (!personCopy.isEmpty()) {
                 Person person = personCopy.poll();
-                if (person.getState() != Person.STATE.GOTOROOM || person.getGoalRoom() != null) {
+                if ((person.getState() != Person.STATE.GOTOROOM || person.getGoalRoom() != null)
+                        && person.getState() != Person.STATE.STANDSTILL) {
                     person.tick(Math.random() < pDeletePerson);
                     break;
                 } else {
@@ -666,7 +751,7 @@ public class Building {
             person.tick();
         }
         //if the state is not evacuation-state, add a person
-        if (state != STATE.EVACUATION) {
+        if (state != STATE.EVACUATION && state != STATE.STANDSTILL) {
             addRandomPerson(pAddPerson);
         }
     }
@@ -884,7 +969,7 @@ public class Building {
                 inside.add(fp.getCell2());
             }
 
-            // gets common Room of outside- and insideCells.
+            // gets common Room of outside- and lowerCells.
             // method throws an exception if not all cells are in the same room
             Room outsideRoom = grid.getRoom(outside);
             Room insideRoom = grid.getRoom(inside);
@@ -1012,16 +1097,20 @@ public class Building {
         /**
          * the cells where the actual stair is
          */
-        transient Pair<Room, HashSet<Cell>> stairCellsPair;
+        transient Pair<Room, HashSet<Cell>> stairCellsPair1;
+        /**
+         * the cells where the actual stair is
+         */
+        transient Pair<Room, HashSet<Cell>> stairCellsPair2;
         /**
          * the cells inside (inside has only a meaning if this is an exit)
          */
-        transient Pair<Room, HashSet<Cell>> insideCells;
+        transient Pair<Room, HashSet<Cell>> lowerCells;
         /**
          * the cells outside (outside has only a meaning if this is an exit, in this
          * case, the Key of this pair is null)
          */
-        transient Pair<Room, HashSet<Cell>> outsideCells;
+        transient Pair<Room, HashSet<Cell>> higherCells;
         /**
          * all cells from which you can change the room
          */
@@ -1029,7 +1118,9 @@ public class Building {
         /**
          * the direction you walk to go up/down the street
          */
-        int direction;
+        final int direction;
+
+        final boolean changeFloor;
 
         /**
          * constructor that constructs a stair based on its cells and the direction, as
@@ -1039,60 +1130,89 @@ public class Building {
          * @param direction  the direction of the stair
          * @param id         the id of this passage
          */
-        private Stair(LinkedList<Cell> stairCells, int direction, int id) {
+        private Stair(LinkedList<Cell> stairCells, boolean changeFloor, int direction, int id) {
 
             super(id);
             this.direction = direction;
+            this.changeFloor = changeFloor;
             this.stairCells = new LinkedList<>(stairCells);
+            LinkedList<Cell> upperStairCells = new LinkedList<>();
 
-            LinkedList<Cell> inside = new LinkedList<>();
-            LinkedList<Cell> outside = new LinkedList<>();
+            LinkedList<Cell> higher = new LinkedList<>();
+            LinkedList<Cell> lower = new LinkedList<>();
 
-            for (Cell cell : stairCells) {
-                if (!stairCells.contains(cell.getNextCell(direction))) {
-                    inside.add(cell.getNextCell(direction));
+            // normal, just calculating the cells
+            if (!changeFloor) {
+                for (Cell cell : stairCells) {
+                    if (!stairCells.contains(cell.getNextCell(direction))) {
+                        higher.add(cell.getNextCell(direction));
+                    }
+                    if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
+                        lower.add(cell.getNextCell(DIR.getComplement(direction)));
+                    }
+
+                    upperStairCells.add(cell);
+                    cell.setStair();
+
                 }
-                if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
-                    outside.add(cell.getNextCell(DIR.getComplement(direction)));
+            }
+            // calculating the upper Room
+            else {
+                for (Cell cell : stairCells) {
+
+                    Cell upperStairCell = cell.getNextCell(DIR.STAY, true);
+                    upperStairCells.add(upperStairCell);
+                    cell.setStair();
+                    upperStairCell.setStair();
+
+                    if (!stairCells.contains(cell.getNextCell(direction))) {
+                        higher.add(upperStairCell.getNextCell(direction));
+                    }
+                    if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
+                        lower.add(cell.getNextCell(DIR.getComplement(direction)));
+                    }
+
                 }
-                cell.setStair();
 
             }
-            Room outsideRoom = grid.getRoom(outside);
-            Room insideRoom = grid.getRoom(inside);
-            Room stairRoom = grid.getRoom(stairCells);
-            this.stairCellsPair = new Pair<>(stairRoom, new HashSet<>(stairCells));
+            Room lowerRoom = grid.getRoom(lower);
+            Room higherRoom = grid.getRoom(higher);
+            Room stairRoom1 = grid.getRoom(stairCells);
+            Room stairRoom2 = grid.getRoom(upperStairCells);
+            this.stairCellsPair1 = new Pair<>(stairRoom1, new HashSet<>(stairCells));
+            this.stairCellsPair2 = new Pair<>(stairRoom2, new HashSet<>(upperStairCells));
+
             roomChangingCells = new HashSet<>(stairCells);
+            roomChangingCells.addAll(upperStairCells);
+
             exit = false;
 
-            if (stairRoom == null) {
+            // if the stair is in the outside, we look for the end of the stairs that is not in the outside
+            if (stairRoom1 == null && stairRoom2 == null) {
                 exit = true;
-                if (outsideRoom == null && insideRoom != null) {
-                    roomChangingCells.addAll(inside);
-                } else if (outsideRoom != null && insideRoom == null) {
-                    roomChangingCells.addAll(outside);
+                if (lowerRoom == null && higherRoom != null) {
+                    roomChangingCells.addAll(higher);
+                } else if (lowerRoom != null && higherRoom == null) {
+                    roomChangingCells.addAll(lower);
                 } else throw new IllegalArgumentException();
-            } else if (outsideRoom == null || insideRoom == null) {
+            }
+            // if one of the other rooms is in the outside, we look for which one it is and add its fields to the
+            // cells to change a room
+            else if (lowerRoom == null || higherRoom == null) {
                 exit = true;
-                if (outsideRoom == null && insideRoom != null) {
-                    roomChangingCells.addAll(outside);
-                } else if (outsideRoom != null /* && insideRoom == null */) {
-                    roomChangingCells.addAll(inside);
+                if (lowerRoom == null && higherRoom != null) {
+                    roomChangingCells.addAll(lower);
+                } else if (lowerRoom != null /* && higherRoom == null */) {
+                    roomChangingCells.addAll(higher);
                 } else throw new IllegalArgumentException();
             }
 
-            if (outsideRoom != null) outsideRoom.addPassage(this);
-            if (insideRoom != null) insideRoom.addPassage(this);
+            if (lowerRoom != null) lowerRoom.addPassage(this);
+            if (higherRoom != null) higherRoom.addPassage(this);
 
-            if (exit && insideRoom == null) {
-                this.connectsInOut = new Pair<>(outsideRoom, null);
-                this.insideCells = new Pair<>(outsideRoom, new HashSet<>(outside));
-                this.outsideCells = new Pair<>(null, new HashSet<>(inside));
-            } else {
-                this.connectsInOut = new Pair<>(insideRoom, outsideRoom);
-                this.insideCells = new Pair<>(insideRoom, new HashSet<>(inside));
-                this.outsideCells = new Pair<>(outsideRoom, new HashSet<>(outside));
-            }
+            this.connectsInOut = new Pair<>(lowerRoom, higherRoom);
+            this.lowerCells = new Pair<>(lowerRoom, new HashSet<>(lower));
+            this.higherCells = new Pair<>(higherRoom, new HashSet<>(higher));
 
         }
 
@@ -1102,33 +1222,48 @@ public class Building {
          * @param stairCells the cells that are occupied by this stair
          * @param direction  the direction of this stair
          */
-        Stair(LinkedList<Cell> stairCells, int direction) {
+        Stair(LinkedList<Cell> stairCells, boolean changeFloors, int direction) {
 
-            this(stairCells, direction, passageNumber++);
+            this(stairCells, changeFloors, direction, passageNumber++);
 
+        }
+
+        //TODO
+        public HashSet<Cell> getStairCells() {
+            HashSet<Cell> sCells = new HashSet<>();
+            sCells.addAll(stairCellsPair1.getValue());
+            sCells.addAll(stairCellsPair2.getValue());
+            return sCells;
         }
 
         /**
          * @return the cells that belong to the stair
          */
-        public Pair<Room, HashSet<Cell>> getStairCellsPair() {
-            return new Pair<>(stairCellsPair.getKey(), new HashSet<>(stairCellsPair.getValue()));
+        public Pair<Room, HashSet<Cell>> getStairCellsPair1() {
+            return new Pair<>(stairCellsPair1.getKey(), new HashSet<>(stairCellsPair1.getValue()));
+        }
+
+        /**
+         * @return the cells that belong to the stair
+         */
+        public Pair<Room, HashSet<Cell>> getStairCellsPair2() {
+            return new Pair<>(stairCellsPair2.getKey(), new HashSet<>(stairCellsPair2.getValue()));
         }
 
         /**
          * @return the cells that belong to the "inside", which has only a meaning if this is an exit
          * else: cells from a random side
          */
-        public Pair<Room, HashSet<Cell>> getInsideCells() {
-            return new Pair<>(insideCells.getKey(), new HashSet<>(insideCells.getValue()));
+        public HashSet<Cell> getLowerCells() {
+            return lowerCells.getValue();
         }
 
         /**
          * @return the cells that belong to the "outside", which has only a meaning if this is an exit
          * else: cells from a random side
          */
-        public Pair<Room, HashSet<Cell>> getOutsideCells() {
-            return new Pair<>(outsideCells.getKey(), new HashSet<>(outsideCells.getValue()));
+        public HashSet<Cell> getHigherCells() {
+            return new HashSet<>(higherCells.getValue());
         }
 
         /**
@@ -1144,7 +1279,11 @@ public class Building {
         @Override
         public Room getExitRoom() {
             if (exit) {
-                return connectsInOut.getKey();
+                if (connectsInOut.getKey() == null) {
+                    return connectsInOut.getValue();
+                } else {
+                    return connectsInOut.getKey();
+                }
             }
             return null;
         }
@@ -1159,6 +1298,32 @@ public class Building {
             return true;
         }
 
+        public boolean isInFloor (int floor) {
+
+            if (connectsInOut.getKey() != null) {
+                if (connectsInOut.getKey().getFloor() == floor) return true;
+            }
+            if (connectsInOut.getValue() != null) {
+                if (connectsInOut.getValue().getFloor() == floor) return true;
+            }
+            return false;
+
+        }
+
+        public int getHigherFloor () {
+
+            return higherCells.getKey().floor;
+
+        }
+
+
+        public int getLowerFloor () {
+
+            return lowerCells.getKey().floor;
+
+        }
+
+
         @Override
         public HashSet<Cell> getRoomChangingCells() {
             return new HashSet<>(roomChangingCells);
@@ -1167,24 +1332,26 @@ public class Building {
         @Override
         public HashSet<Cell> getRoomChangingCells(Room room) {
             if (room != null) {
-                if (room.equals(insideCells.getKey())) {
-                    if (insideCells.getKey().equals(stairCellsPair.getKey())) {
-                        return stairCellsPair.getValue();
-                    } else return insideCells.getValue();
+                if (room.equals(lowerCells.getKey())) {
+                    if (lowerCells.getKey().equals(stairCellsPair1.getKey())) {
+                        return stairCellsPair1.getValue();
+                    } else return lowerCells.getValue();
                 }
                 if (!isExit()) {
-                    if (room.equals(outsideCells.getKey())) {
-                        if (outsideCells.getKey().equals(stairCellsPair.getKey())) {
-                            return stairCellsPair.getValue();
-                        } else return outsideCells.getValue();
+                    if (room.equals(higherCells.getKey())) {
+                        if (higherCells.getKey().equals(stairCellsPair2.getKey())) {
+                            return stairCellsPair2.getValue();
+                        } else return higherCells.getValue();
                     }
                 }
             } else {
                 if (isExit()) {
-                    if (stairCellsPair.getKey() == null) {
-                        return stairCellsPair.getValue();
+                    if (stairCellsPair1.getKey() == null) {
+                        return stairCellsPair1.getValue();
+                    } else if (higherCells.getKey() == null) {
+                        return higherCells.getValue();
                     } else {
-                        return outsideCells.getValue();
+                        return lowerCells.getValue();
                     }
                 }
             }
@@ -1278,7 +1445,7 @@ public class Building {
             for (int i = beginning.getX(); i <= end.getX(); i++) {
                 for (int j = beginning.getY(); j <= end.getY(); j++) {
 
-                    tempCells.add(grid.getCell(i, j));
+                    tempCells.add(grid.getCell(i, j, floor));
 
                 }
             }
@@ -1417,6 +1584,21 @@ public class Building {
 
             building.updateNumbers();
 
+
+            if (buildingObject.get("personsInBuilding") != null) {
+
+                JsonArray people = buildingObject.getAsJsonArray("personsInBuilding");
+
+
+                for (JsonElement temp : people) {
+                    JsonObject person = temp.getAsJsonObject();
+                    deserializePerson(person, building);
+                }
+
+                building.state = STATE.STANDSTILL;
+
+            }
+
             return building;
         }
 
@@ -1431,6 +1613,22 @@ public class Building {
             Cell beginning = deserializeCell(json.getAsJsonObject("beginning"), building);
             Cell end = deserializeCell(json.getAsJsonObject("end"), building);
             building.addRoom(beginning, end, id);
+        }
+
+
+        /**
+         * creates a new Room from a json-fragment describing a room
+         *
+         * @param json     the json that represents the room
+         * @param building the building this room will be added to
+         */
+        private void deserializePerson(JsonObject json, Building building) {
+            int id = json.get("id").getAsInt();
+            String name = json.get("name").getAsString();
+            boolean isDisabled = json.get("isDisabled").getAsBoolean();
+            Cell isOnCell = deserializeCell(json.get("isOnCell").getAsJsonObject(), building);
+
+            building.addPerson(new Person(name, isOnCell, isDisabled, Person.STATE.STANDSTILL, building));
         }
 
         /**
@@ -1463,6 +1661,7 @@ public class Building {
         private void deserializeStair(JsonObject json, Building building) {
             int id = json.get("id").getAsInt();
             int direction = json.get("direction").getAsInt();
+            boolean changeFloor = json.get("changeFloor").getAsBoolean();
 
             LinkedList<Cell> stairCells = new LinkedList<>();
             JsonArray tempStairCells = json.getAsJsonArray("stairCells");
@@ -1470,7 +1669,7 @@ public class Building {
                 JsonObject tempCell = temp.getAsJsonObject();
                 stairCells.add(deserializeCell(tempCell, building));
             }
-            building.addStair(stairCells, direction, id);
+            building.addStair(stairCells, changeFloor, direction, id);
         }
 
         /**
