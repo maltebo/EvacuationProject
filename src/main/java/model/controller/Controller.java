@@ -18,7 +18,6 @@ import java.util.Random;
 public class Controller implements Runnable {
 
     private Building building = new Building();
-    private BuildingRepresentation buildingRepresentation = new BuildingRepresentation(building, 0);
 
     private Window window;
     private Menu menu;
@@ -111,7 +110,7 @@ public class Controller implements Runnable {
             if (state != STATE.EMPTY) {
                 if (state == STATE.PAUSE) {
 
-                    buildingRepresentation.render(percentage);
+                    window.render(percentage);
                     window.repaint();
                     lastTime = System.currentTimeMillis() - deltaTime;
 
@@ -125,13 +124,13 @@ public class Controller implements Runnable {
                     percentage = ((float) deltaTime / (float) milliSecondsPerStep);
                     if (percentage >= 1) {
                         lastTime = System.currentTimeMillis();
-                        buildingRepresentation.render(1.0f);
+                        window.render(1.0f);
                         window.repaint();
                         building.tick();
 
                     } else {
                         if (deltaTime > (1000 / 30)) {
-                            buildingRepresentation.render(percentage);
+                            window.render(percentage);
                             window.repaint();
                         }
                     }
@@ -161,8 +160,7 @@ public class Controller implements Runnable {
         emergency = false;
         building = Building.fromJSON(file);
         building.setAverageCapacity(numberOfPeople);
-        buildingRepresentation = new BuildingRepresentation(building, 0);
-        window.changeBuilding(buildingRepresentation);
+        window.changeBuilding(building);
         state = STATE.PAUSE;
         menu.stateChanged(STATE.PAUSE);
 
@@ -180,7 +178,6 @@ public class Controller implements Runnable {
 
     public synchronized void stopBuilding() {
         building = new Building();
-        buildingRepresentation = new BuildingRepresentation(building, 0);
         state = STATE.EMPTY;
         menu.stateChanged(STATE.EMPTY);
     }
@@ -309,13 +306,12 @@ public class Controller implements Runnable {
         Controller controller = new Controller();
 
         controller.building = new Building();
-        controller.buildingRepresentation = new BuildingRepresentation(controller.building, 0);
 
         controller.menu = new Menu(controller);
 
         controller.window = new Window(640,
                 400,
-                controller.buildingRepresentation,
+                controller.building,
                 controller.menu,
                 new JPanel());
 
