@@ -9,6 +9,7 @@ import model.graph.PathOntology;
 import model.graph.building.Building.Passage;
 import model.graph.building.Building.Room;
 import model.graph.evacuation.EvacuationStrategy;
+import model.helper.Logger;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -338,14 +339,9 @@ class MovementModule {
 
             for (int direction : DIR.getDirections()) {
 
-                System.out.println(person.getIsOnCell());
-                System.out.println(person.getIsOnCell().getNextStairCell(direction));
-                System.out.println(direction);
-
                 if (cells.contains(person.getIsOnCell().getNextStairCell(direction))) {
                     dir.add(direction);
                 }
-
 
             }
 
@@ -445,8 +441,11 @@ class MovementModule {
 
         for (int dir : DIR.getDirections()) {
 
-            if (cell.getNextCell(dir).getRoom() != null) {
-                directions.add(dir);
+            // if the next step is possible
+            if (cell.getNextCell(dir) != null) {
+                if (cell.getNextCell(dir).getRoom() != null) {
+                    directions.add(dir);
+                }
             }
 
         }
@@ -466,15 +465,17 @@ class MovementModule {
      */
     private boolean isValid(Cell oldCell, Cell newCell, boolean isDisabled) {
 
-        // cell must not be a stair and the person at the same time disabled
-        if (!isDisabled || !newCell.isStair()) {
-            // cell must not be occupied, ther must not be a wall between the two cells
-            if (!newCell.isOccupied() && !isWall(oldCell, newCell)) {
-                // not both of the cells can be blocked at the same time. That is so for avoiding
-                // two people to go both diagonally in different directions so that they cross.
-                if (!oldCell.isBlocked() || !newCell.isBlocked()) {
+        if (oldCell != null && newCell != null) {
+            // cell must not be a stair and the person at the same time disabled
+            if (!isDisabled || !newCell.isStair()) {
+                // cell must not be occupied, ther must not be a wall between the two cells
+                if (!newCell.isOccupied() && !isWall(oldCell, newCell)) {
+                    // not both of the cells can be blocked at the same time. That is so for avoiding
+                    // two people to go both diagonally in different directions so that they cross.
+                    if (!oldCell.isBlocked() || !newCell.isBlocked()) {
 
-                    return true;
+                        return true;
+                    }
                 }
             }
         }

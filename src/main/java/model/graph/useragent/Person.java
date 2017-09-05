@@ -377,10 +377,27 @@ public class Person {
      * @param direction the direction the person is going in
      */
     private void blockCells(int direction) {
-        if (direction % DIR.DOWN == 0) isOnCell.getNextCell(DIR.DOWN).block(true);
-        else isOnCell.getNextCell(DIR.UP).block(true);
-        if (direction % DIR.LEFT == 0) isOnCell.getNextCell(DIR.LEFT).block(true);
-        else isOnCell.getNextCell(DIR.RIGHT).block(true);
+        if (direction % DIR.DOWN == 0) {
+            if (isOnCell.getNextCell(DIR.DOWN) != null) {
+                isOnCell.getNextCell(DIR.DOWN).block(true);
+            }
+        }
+
+        else if (direction % DIR.UP == 0) {
+            if (isOnCell.getNextCell(DIR.UP) != null) {
+                isOnCell.getNextCell(DIR.UP).block(true);
+            }
+        }
+        if (direction % DIR.LEFT == 0) {
+            if (isOnCell.getNextCell(DIR.LEFT) != null) {
+                isOnCell.getNextCell(DIR.LEFT).block(true);
+            }
+        }
+        else if (direction % DIR.RIGHT == 0) {
+            if (isOnCell.getNextCell(DIR.RIGHT) != null) {
+                isOnCell.getNextCell(DIR.RIGHT).block(true);
+            }
+        }
     }
 
     public void startEvacuation() {

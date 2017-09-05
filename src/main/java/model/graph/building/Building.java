@@ -163,7 +163,7 @@ public class Building {
 
         for (Stair stair : building.stairs) {
             LinkedList<Cell> tempCells = new LinkedList<>();
-            for (Cell cell : stair.stairCells) {
+            for (Cell cell : stair.lowerStairCells) {
                 tempCells.add(grid.getCell(cell));
             }
 
@@ -1093,7 +1093,7 @@ public class Building {
         /**
          * the list of cells that are occupied by this stair
          */
-        LinkedList<Cell> stairCells;
+        LinkedList<Cell> lowerStairCells;
         /**
          * the cells where the actual stair is
          */
@@ -1126,16 +1126,16 @@ public class Building {
          * constructor that constructs a stair based on its cells and the direction, as
          * well as the id.
          *
-         * @param stairCells the cells that are occupied by this stair
-         * @param direction  the direction of the stair
-         * @param id         the id of this passage
+         * @param lowerStairCells the cells that are occupied by this stair
+         * @param direction       the direction of the stair
+         * @param id              the id of this passage
          */
-        private Stair(LinkedList<Cell> stairCells, boolean changeFloor, int direction, int id) {
+        private Stair(LinkedList<Cell> lowerStairCells, boolean changeFloor, int direction, int id) {
 
             super(id);
             this.direction = direction;
             this.changeFloor = changeFloor;
-            this.stairCells = new LinkedList<>(stairCells);
+            this.lowerStairCells = new LinkedList<>(lowerStairCells);
             LinkedList<Cell> upperStairCells = new LinkedList<>();
 
             LinkedList<Cell> higher = new LinkedList<>();
@@ -1143,12 +1143,12 @@ public class Building {
 
             // normal, just calculating the cells
             if (!changeFloor) {
-                for (Cell cell : stairCells) {
-                    if (!stairCells.contains(cell.getNextCell(direction))) {
-                        higher.add(cell.getNextCell(direction));
+                for (Cell cell : lowerStairCells) {
+                    if (!lowerStairCells.contains(cell.getNextCell(direction, false))) {
+                        higher.add(cell.getNextCell(direction, false));
                     }
-                    if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
-                        lower.add(cell.getNextCell(DIR.getComplement(direction)));
+                    if (!lowerStairCells.contains(cell.getNextCell(DIR.getComplement(direction), false))) {
+                        lower.add(cell.getNextCell(DIR.getComplement(direction), false));
                     }
 
                     upperStairCells.add(cell);
@@ -1158,32 +1158,37 @@ public class Building {
             }
             // calculating the upper Room
             else {
-                for (Cell cell : stairCells) {
+                for (Cell cell : lowerStairCells) {
 
-                    Cell upperStairCell = cell.getNextCell(DIR.STAY, true);
+                    Cell upperStairCell = cell.getNextCell(DIR.STAY, 1);
                     upperStairCells.add(upperStairCell);
                     cell.setStair();
                     upperStairCell.setStair();
 
-                    if (!stairCells.contains(cell.getNextCell(direction))) {
-                        higher.add(upperStairCell.getNextCell(direction));
+                    // if the next cell is not part of the staircells, we add it to the
+                    // upper Cells
+                    if (!lowerStairCells.contains(cell.getNextCell(direction, false))) {
+                        higher.add(upperStairCell.getNextCell(direction, false));
                     }
-                    if (!stairCells.contains(cell.getNextCell(DIR.getComplement(direction)))) {
-                        lower.add(cell.getNextCell(DIR.getComplement(direction)));
+                    // if the next cell in the wrong direction ("downstairs") is not part
+                    // of the staircells, we add it to the lower Cells
+                    if (!lowerStairCells.contains(cell.getNextCell(DIR.getComplement(direction), false))) {
+                        lower.add(cell.getNextCell(DIR.getComplement(direction), false));
                     }
 
                 }
 
             }
             Room lowerRoom = grid.getRoom(lower);
+
             Room higherRoom = grid.getRoom(higher);
-            Room stairRoom1 = grid.getRoom(stairCells);
+            Room stairRoom1 = grid.getRoom(lowerStairCells);
             Room stairRoom2 = grid.getRoom(upperStairCells);
-            this.stairCellsPair1 = new Pair<>(stairRoom1, new HashSet<>(stairCells));
+            this.stairCellsPair1 = new Pair<>(stairRoom1, new HashSet<>(lowerStairCells));
             this.stairCellsPair2 = new Pair<>(stairRoom2, new HashSet<>(upperStairCells));
 
-            roomChangingCells = new HashSet<>(stairCells);
-            roomChangingCells.addAll(upperStairCells);
+            roomChangingCells = new HashSet<>(lowerStairCells);
+            roomChangingCells.addAll(higher);
 
             exit = false;
 
@@ -1219,12 +1224,12 @@ public class Building {
         /**
          * constructor that constructs a stair based on its cells and the direction.
          *
-         * @param stairCells the cells that are occupied by this stair
-         * @param direction  the direction of this stair
+         * @param lowerStairCells the cells that are occupied by this stair
+         * @param direction       the direction of this stair
          */
-        Stair(LinkedList<Cell> stairCells, boolean changeFloors, int direction) {
+        Stair(LinkedList<Cell> lowerStairCells, boolean changeFloors, int direction) {
 
-            this(stairCells, changeFloors, direction, passageNumber++);
+            this(lowerStairCells, changeFloors, direction, passageNumber++);
 
         }
 
@@ -1298,7 +1303,7 @@ public class Building {
             return true;
         }
 
-        public boolean isInFloor (int floor) {
+        public boolean isInFloor(int floor) {
 
             if (connectsInOut.getKey() != null) {
                 if (connectsInOut.getKey().getFloor() == floor) return true;
@@ -1310,16 +1315,18 @@ public class Building {
 
         }
 
-        public int getHigherFloor () {
+        public int getHigherFloor() {
 
             return higherCells.getKey().floor;
 
         }
 
 
-        public int getLowerFloor () {
+        public int getLowerFloor() {
 
-            return lowerCells.getKey().floor;
+            if (lowerCells.getKey() != null) {
+                return lowerCells.getKey().floor;
+            } else return 0;
 
         }
 
@@ -1332,14 +1339,43 @@ public class Building {
         @Override
         public HashSet<Cell> getRoomChangingCells(Room room) {
             if (room != null) {
-                if (room.equals(lowerCells.getKey())) {
-                    if (lowerCells.getKey().equals(stairCellsPair1.getKey())) {
-                        return stairCellsPair1.getValue();
-                    } else return lowerCells.getValue();
+                HashSet<Cell> changingCells = new HashSet<>();
+
+                for (Cell cell : getRoomChangingCells()) {
+                    if (room.equals(cell.getRoom())) {
+                        changingCells.add(cell);
+                    }
                 }
-                if (!isExit()) {
-                    if (room.equals(higherCells.getKey())) {
-                        if (higherCells.getKey().equals(stairCellsPair2.getKey())) {
+
+                return changingCells;
+            } else {
+
+                HashSet<Cell> changingCells = new HashSet<>();
+                for (Cell cell : getRoomChangingCells()) {
+                    if (cell.getRoom() == null) {
+                        changingCells.add(cell);
+                    }
+                }
+                return changingCells;
+            }
+
+
+            /*if (room != null) {
+                if (changeFloor) {
+                    if (room.equals(stairCellsPair1.getKey())) {
+                        return stairCellsPair1.getValue();
+                    } else if (room.equals(higherCells.getKey())) {
+                        return higherCells.getValue();
+                    }
+                } else {
+                    if (room.equals(lowerCells.getKey())) {
+                        if (lowerCells.getKey().equals(stairCellsPair1.getKey())) {
+                            return stairCellsPair1.getValue();
+                        } else {
+                            return lowerCells.getValue();
+                        }
+                    } else if (room.equals(higherCells.getKey())) {
+                        if (room.equals(stairCellsPair2.getKey())) {
                             return stairCellsPair2.getValue();
                         } else return higherCells.getValue();
                     }
@@ -1355,7 +1391,13 @@ public class Building {
                     }
                 }
             }
-            return null;
+            return null;*/
+        }
+
+        @Override
+        public String toString() {
+            return "Stair: " + id + "\nStair Cells: " + getStairCells() + "\nlower Room: " + lowerCells.getKey() +
+                    "\nhigher Room: " + higherCells.getKey();
         }
     }
 
@@ -1664,7 +1706,7 @@ public class Building {
             boolean changeFloor = json.get("changeFloor").getAsBoolean();
 
             LinkedList<Cell> stairCells = new LinkedList<>();
-            JsonArray tempStairCells = json.getAsJsonArray("stairCells");
+            JsonArray tempStairCells = json.getAsJsonArray("lowerStairCells");
             for (JsonElement temp : tempStairCells) {
                 JsonObject tempCell = temp.getAsJsonObject();
                 stairCells.add(deserializeCell(tempCell, building));

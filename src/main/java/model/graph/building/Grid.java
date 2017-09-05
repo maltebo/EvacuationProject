@@ -1,5 +1,6 @@
 package model.graph.building;
 
+import model.helper.Logger;
 import model.helper.Pair;
 import model.graph.building.Building.*;
 
@@ -180,6 +181,11 @@ public class Grid {
 
         public Cell getNextCell(int dir) {
 
+            return getNextCell(dir, true);
+        }
+
+        public Cell getNextCell(int dir, boolean stairSearch) {
+
             int newX = x;
             int newY = y;
 
@@ -190,15 +196,23 @@ public class Grid {
 
             Cell newCell = getCell(newX, newY, floor);
 
+            if (stairSearch) {
+
+                if (this.isStair ^ newCell.isStair) {
+                    return getNextStairCell(dir);
+                }
+
+            }
+
             return newCell;
         }
 
+
         public Cell getNextStairCell(int dir) {
 
-            Cell nextCell = getNextCell(dir);
-            if (isStair && getNextCell(dir).isStair) {
-                return nextCell;
-            } else {
+            Cell nextCell = getNextCell(dir, false);
+
+            if (isStair ^ nextCell.isStair) {
                 Cell tempCell = isStair ? this : nextCell;
 
                 Stair stair = null;
@@ -211,32 +225,33 @@ public class Grid {
                     }
                 }
 
+
                 if (stair == null) {
                     System.err.println("STAIR NOT FOUND");
                     return null;
                 }
 
+
                 if (this.isStair) {
 
                     if (dir == stair.direction) {
 
-                        if (stair.getHigherCells().contains(tempCell)) {
+                        nextCell = getCell(nextCell.x, nextCell.y, stair.getHigherFloor());
 
-                            int newX = tempCell.x;
-                            int newY = tempCell.y;
 
-                            return getCell(newX, newY, stair.getHigherFloor());
+                        if (stair.getHigherCells().contains(nextCell)) {
+
+                            return nextCell;
 
                         }
 
                     } else if (dir == DIR.getComplement(stair.getDirection())) {
 
-                        if (stair.getLowerCells().contains(tempCell)) {
+                        nextCell = getCell(nextCell.x, nextCell.y, stair.getLowerFloor());
 
-                            int newX = tempCell.x;
-                            int newY = tempCell.y;
+                        if (stair.getLowerCells().contains(nextCell)) {
 
-                            return getCell(newX, newY, stair.getLowerFloor());
+                            return nextCell;
 
                         }
 
@@ -249,10 +264,7 @@ public class Grid {
 
                         if (stair.getLowerCells().contains(this)) {
 
-                            int newX = tempCell.x;
-                            int newY = tempCell.y;
-
-                            return getCell(newX, newY, floor);
+                            return getCell(nextCell.x, nextCell.y, stair.getLowerFloor());
 
                         }
 
@@ -260,10 +272,7 @@ public class Grid {
 
                         if (stair.getHigherCells().contains(this)) {
 
-                            int newX = tempCell.x;
-                            int newY = tempCell.y;
-
-                            return getCell(newX, newY, floor);
+                            return getCell(nextCell.x, nextCell.y, stair.getLowerFloor());
 
                         }
 
@@ -271,12 +280,16 @@ public class Grid {
 
                 }
                 return null;
+            } else {
+                return nextCell;
             }
 
         }
 
 
-        public Cell getNextCell(int dir, boolean up) {
+
+
+        public Cell getNextCell(int dir, int up) {
 
             int newX = x;
             int newY = y;
@@ -287,15 +300,16 @@ public class Grid {
             if (dir % DIR.LEFT == 0) newX -= 1;
             if (dir % DIR.RIGHT == 0) newX += 1;
 
-            if (up) {
+            if (up > 0) {
                 newFloor++;
-            } else {
+            } else if (up < 0){
                 newFloor--;
             }
 
             return getCell(newX, newY, newFloor);
 
         }
+
 
         public boolean isOutside() {
 
@@ -346,7 +360,8 @@ public class Grid {
             Cell cell = (Cell) o;
 
             if (x != cell.x) return false;
-            return y == cell.y;
+            if (y != cell.y) return false;
+            return floor == cell.floor;
         }
 
         @Override

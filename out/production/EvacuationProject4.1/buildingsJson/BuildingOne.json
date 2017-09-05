@@ -2,7 +2,7 @@
   "name": "Building One",
   "gridSizeX": 20,
   "gridSizeY": 8,
-  "floors": 12,
+  "floors": 1,
   "averageCapacity": 0,
   "rooms": [
     {
@@ -289,7 +289,7 @@
   ],
   "stairs": [
     {
-      "stairCells": [
+      "lowerStairCells": [
         {
           "x": -1,
           "y": 5,
@@ -301,18 +301,20 @@
           "floor": 0
         }
       ],
-      "direction": 17,
+      "direction": 37,
+      "changeFloor": false,
       "id": 7
     },
     {
-      "stairCells": [
+      "lowerStairCells": [
         {
           "x": 17,
           "y": -1,
           "floor": 0
         }
       ],
-      "direction": 11,
+      "direction": 31,
+      "changeFloor": false,
       "id": 9
     }
   ]

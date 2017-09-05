@@ -243,8 +243,8 @@ public class BuildingRepresentation extends Canvas {
         for (int x = room.getBeginning().getX(); x <= room.getEnd().getX(); x++) {
 
             Grid.Cell cell1 = building.getCell(x, room.getBeginning().getY(), room.getFloor());
-            if (!room.isPassage(cell1, cell1.getNextCell(DIR.UP))) {
-                CoordCellPair ccp = getWallCoordinates(cell1, cell1.getNextCell(DIR.UP));
+            if (!room.isPassage(cell1, cell1.getNextCell(DIR.UP, false))) {
+                CoordCellPair ccp = getWallCoordinates(cell1, cell1.getNextCell(DIR.UP, false));
                 Line2D line = new Line2D.Float(ccp.getCell1().getX(), ccp.getCell1().getY(),
                         ccp.getCell2().getX(), ccp.getCell2().getY());
                 roomPath.append(line, false);
@@ -252,8 +252,8 @@ public class BuildingRepresentation extends Canvas {
 
             }
             Grid.Cell cell2 = building.getCell(x, room.getEnd().getY(), room.getFloor());
-            if (!room.isPassage(cell2, cell2.getNextCell(DIR.DOWN))) {
-                CoordCellPair ccp = getWallCoordinates(cell2, cell2.getNextCell(DIR.DOWN));
+            if (!room.isPassage(cell2, cell2.getNextCell(DIR.DOWN, false))) {
+                CoordCellPair ccp = getWallCoordinates(cell2, cell2.getNextCell(DIR.DOWN, false));
                 roomPath.append(new Line2D.Float(ccp.getCell1().getX(), ccp.getCell1().getY(),
                         ccp.getCell2().getX(), ccp.getCell2().getY()), false);
             }
@@ -262,14 +262,14 @@ public class BuildingRepresentation extends Canvas {
         for (int y = room.getBeginning().getY(); y <= room.getEnd().getY(); y++) {
 
             Grid.Cell cell1 = building.getCell(room.getBeginning().getX(), y, room.getFloor());
-            if (!room.isPassage(cell1, cell1.getNextCell(DIR.LEFT))) {
-                CoordCellPair ccp = getWallCoordinates(cell1, cell1.getNextCell(DIR.LEFT));
+            if (!room.isPassage(cell1, cell1.getNextCell(DIR.LEFT, false))) {
+                CoordCellPair ccp = getWallCoordinates(cell1, cell1.getNextCell(DIR.LEFT, false));
                 roomPath.append(new Line2D.Float(ccp.getCell1().getX(), ccp.getCell1().getY(),
                         ccp.getCell2().getX(), ccp.getCell2().getY()), false);
             }
             Grid.Cell cell2 = building.getCell(room.getEnd().getX(), y, room.getFloor());
-            if (!room.isPassage(cell2, cell2.getNextCell(DIR.RIGHT))) {
-                CoordCellPair ccp = getWallCoordinates(cell2, cell2.getNextCell(DIR.RIGHT));
+            if (!room.isPassage(cell2, cell2.getNextCell(DIR.RIGHT, false))) {
+                CoordCellPair ccp = getWallCoordinates(cell2, cell2.getNextCell(DIR.RIGHT, false));
                 roomPath.append(new Line2D.Float(ccp.getCell1().getX(), ccp.getCell1().getY(),
                         ccp.getCell2().getX(), ccp.getCell2().getY()), false);
             }
