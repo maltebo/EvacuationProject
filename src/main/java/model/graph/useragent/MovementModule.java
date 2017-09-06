@@ -293,6 +293,7 @@ class MovementModule {
                     // see above
                     if (isValid(cell, newCell, person.isDisabled()) && cell.getRoom().equals(newCell.getRoom())) {
                         return direction;
+
                     }
                 }
 

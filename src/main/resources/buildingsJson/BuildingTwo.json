@@ -1,0 +1,214 @@
+{
+  "name": "Building One",
+  "gridSizeX": 10,
+  "gridSizeY": 10,
+  "floors": 2,
+  "rooms": [
+    {
+      "beginning": {
+        "x": 0,
+        "y": 0,
+        "floor": 0
+      },
+      "end": {
+        "x": 4,
+        "y": 4,
+        "floor": 0
+      },
+      "id": 0
+    },
+    {
+    "beginning": {
+      "x": 5,
+      "y": 0,
+      "floor": 0
+    },
+    "end": {
+      "x": 9,
+      "y": 9,
+      "floor": 0
+    },
+    "id": 1
+    },
+    {
+      "beginning": {
+        "x": 0,
+        "y": 5,
+        "floor": 0
+      },
+      "end": {
+        "x": 4,
+        "y": 9,
+        "floor": 0
+      },
+      "id": 2
+    },
+    {
+      "beginning": {
+        "x": 0,
+        "y": 0,
+        "floor": 1
+      },
+      "end": {
+        "x": 6,
+        "y": 7,
+        "floor": 1
+      },
+      "id": 3
+    }
+  ],
+  "doors": [
+    {
+      "connectedCells": [
+        {
+          "cell1": {
+            "x": 2,
+            "y": -1,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 2,
+            "y": 0,
+            "floor": 0
+          }
+        }
+      ],
+      "id": 0
+    },
+    {
+      "connectedCells": [
+        {
+          "cell1": {
+            "x": -1,
+            "y": 6,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 0,
+            "y": 6,
+            "floor": 0
+          }
+        },
+        {
+          "cell1": {
+            "x": -1,
+            "y": 7,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 0,
+            "y": 7,
+            "floor": 0
+          }
+        }
+      ],
+      "id": 1
+    },
+    {
+      "connectedCells": [
+        {
+          "cell1": {
+            "x": 4,
+            "y": 6,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 5,
+            "y": 6,
+            "floor": 0
+          }
+        },
+        {
+          "cell1": {
+            "x": 4,
+            "y": 7,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 5,
+            "y": 7,
+            "floor": 0
+          }
+        }
+      ],
+      "id": 2
+    },
+    {
+      "connectedCells": [
+        {
+          "cell1": {
+            "x": 7,
+            "y": 9,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 7,
+            "y": 10,
+            "floor": 0
+          }
+        },
+        {
+          "cell1": {
+            "x": 8,
+            "y": 9,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 8,
+            "y": 10,
+            "floor": 0
+          }
+        }
+      ],
+      "id": 3
+    },
+    {
+      "connectedCells": [
+        {
+          "cell1": {
+            "x": 4,
+            "y": 1,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 5,
+            "y": 1,
+            "floor": 0
+          }
+        },
+        {
+          "cell1": {
+            "x": 4,
+            "y": 2,
+            "floor": 0
+          },
+          "cell2": {
+            "x": 5,
+            "y": 2,
+            "floor": 0
+          }
+        }
+      ],
+      "id": 4
+    }
+  ],
+  "stairs": [
+    {
+      "lowerStairCells": [
+        {
+          "x": 2,
+          "y": 2,
+          "floor": 0
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "floor": 0
+        }
+      ],
+      "direction": 11,
+      "changeFloor": true,
+      "id": 5
+    }
+  ]
+}
