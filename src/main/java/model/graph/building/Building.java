@@ -77,7 +77,7 @@ public class Building {
     /**
      * the average number of people in the building.
      */
-    private int averageCapacity;
+    private transient int averageCapacity;
 
     /**
      * a <code>HashSet</code> of all persons that are currently in the building.
