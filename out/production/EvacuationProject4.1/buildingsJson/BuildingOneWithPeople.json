@@ -3,6 +3,258 @@
   "gridSizeX": 20,
   "gridSizeY": 8,
   "floors": 1,
+  "personsInBuilding": [
+    {
+      "name": "RandomPerson20",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 16,
+        "y": 4,
+        "floor": 0
+      },
+      "id": 20
+    },
+    {
+      "name": "RandomPerson11",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 9,
+        "y": 3,
+        "floor": 0
+      },
+      "id": 11
+    },
+    {
+      "name": "RandomPerson31",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 19,
+        "y": 4,
+        "floor": 0
+      },
+      "id": 31
+    },
+    {
+      "name": "RandomPerson33",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 15,
+        "y": 6,
+        "floor": 0
+      },
+      "id": 33
+    },
+    {
+      "name": "RandomPerson29",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 1,
+        "y": 1,
+        "floor": 0
+      },
+      "id": 29
+    },
+    {
+      "name": "RandomPerson16",
+      "isDisabled": true,
+      "isOnCell": {
+        "x": 3,
+        "y": 2,
+        "floor": 0
+      },
+      "id": 16
+    },
+    {
+      "name": "RandomPerson17",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 9,
+        "y": 5,
+        "floor": 0
+      },
+      "id": 17
+    },
+    {
+      "name": "RandomPerson22",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 13,
+        "y": 0,
+        "floor": 0
+      },
+      "id": 22
+    },
+    {
+      "name": "RandomPerson28",
+      "isDisabled": true,
+      "isOnCell": {
+        "x": 5,
+        "y": 0,
+        "floor": 0
+      },
+      "id": 28
+    },
+    {
+      "name": "RandomPerson19",
+      "isDisabled": true,
+      "isOnCell": {
+        "x": 8,
+        "y": 0,
+        "floor": 0
+      },
+      "id": 19
+    },
+    {
+      "name": "RandomPerson23",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 18,
+        "y": 3,
+        "floor": 0
+      },
+      "id": 23
+    },
+    {
+      "name": "RandomPerson25",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 12,
+        "y": 5,
+        "floor": 0
+      },
+      "id": 25
+    },
+    {
+      "name": "RandomPerson18",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 0,
+        "y": 1,
+        "floor": 0
+      },
+      "id": 18
+    },
+    {
+      "name": "RandomPerson35",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 16,
+        "y": 6,
+        "floor": 0
+      },
+      "id": 35
+    },
+    {
+      "name": "RandomPerson21",
+      "isDisabled": true,
+      "isOnCell": {
+        "x": 5,
+        "y": 3,
+        "floor": 0
+      },
+      "id": 21
+    },
+    {
+      "name": "RandomPerson14",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 13,
+        "y": 7,
+        "floor": 0
+      },
+      "id": 14
+    },
+    {
+      "name": "RandomPerson15",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 15,
+        "y": 5,
+        "floor": 0
+      },
+      "id": 15
+    },
+    {
+      "name": "RandomPerson27",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 18,
+        "y": 0,
+        "floor": 0
+      },
+      "id": 27
+    },
+    {
+      "name": "RandomPerson26",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 14,
+        "y": 7,
+        "floor": 0
+      },
+      "id": 26
+    },
+    {
+      "name": "RandomPerson34",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 17,
+        "y": 6,
+        "floor": 0
+      },
+      "id": 34
+    },
+    {
+      "name": "RandomPerson13",
+      "isDisabled": true,
+      "isOnCell": {
+        "x": 10,
+        "y": 6,
+        "floor": 0
+      },
+      "id": 13
+    },
+    {
+      "name": "RandomPerson24",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 4,
+        "y": 2,
+        "floor": 0
+      },
+      "id": 24
+    },
+    {
+      "name": "RandomPerson12",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 6,
+        "y": 0,
+        "floor": 0
+      },
+      "id": 12
+    },
+    {
+      "name": "RandomPerson30",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 1,
+        "y": 2,
+        "floor": 0
+      },
+      "id": 30
+    },
+    {
+      "name": "RandomPerson32",
+      "isDisabled": false,
+      "isOnCell": {
+        "x": 0,
+        "y": 4,
+        "floor": 0
+      },
+      "id": 32
+    }
+  ],
   "rooms": [
     {
       "beginning": {
