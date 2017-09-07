@@ -11,6 +11,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -729,7 +730,8 @@ public class Building {
         grid.unblock();
         LinkedList<Person> personCopy = new LinkedList<>(personsInBuilding);
         // persons who are in the building the longest are first
-        personCopy.sort(Comparator.comparingInt(Person::getId));
+        //personCopy.sort(Comparator.comparingInt(Person::getId));
+        Collections.shuffle(personCopy);
         // lets persons leave the building with some earlier defined probability
         // <code>pDeletePerson</code>
         while (true) {
